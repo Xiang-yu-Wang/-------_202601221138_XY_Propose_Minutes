@@ -1,6 +1,12 @@
 <script setup lang="ts">
-import { ref } from 'vue'
-import { ChevronLeft, ChevronRight, ZoomIn, X } from 'lucide-vue-next'
+import { ref, computed } from 'vue'
+import { ChevronLeft, ChevronRight, ZoomIn } from 'lucide-vue-next'
+import { Button } from '@/components/ui/button'
+import {
+  Dialog,
+  DialogContent,
+  DialogTrigger,
+} from '@/components/ui/dialog'
 
 // Sample images from the original site
 const galleryImages = [
@@ -18,34 +24,26 @@ const galleryImages = [
   'https://custom-images.strikinglycdn.com/res/hrscywv4p/image/upload/c_limit,fl_lossy,h_9000,w_1200,f_auto,q_80/23513522/552746_216976.jpeg',
 ]
 
-const currentPage = ref(0)
-const selectedImage = ref<string | null>(null)
-const imagesPerPage = 6
-const totalPages = Math.ceil(galleryImages.length / imagesPerPage)
+// Pagination state
+const currentPage = ref(1)
+const pageSize = 6
 
-const currentImages = () => {
-  const start = currentPage.value * imagesPerPage
-  return galleryImages.slice(start, start + imagesPerPage)
+// Computed pagination values
+const pageCount = computed(() => Math.ceil(galleryImages.length / pageSize))
+const isFirstPage = computed(() => currentPage.value === 1)
+const isLastPage = computed(() => currentPage.value >= pageCount.value)
+
+const currentPageSize = computed(() => {
+  const start = (currentPage.value - 1) * pageSize
+  return galleryImages.slice(start, start + pageSize)
+})
+
+const prev = () => {
+  if (!isFirstPage.value) currentPage.value--
 }
 
-const nextPage = () => {
-  if (currentPage.value < totalPages - 1) {
-    currentPage.value++
-  }
-}
-
-const prevPage = () => {
-  if (currentPage.value > 0) {
-    currentPage.value--
-  }
-}
-
-const openLightbox = (image: string) => {
-  selectedImage.value = image
-}
-
-const closeLightbox = () => {
-  selectedImage.value = null
+const next = () => {
+  if (!isLastPage.value) currentPage.value++
 }
 </script>
 
@@ -63,79 +61,58 @@ const closeLightbox = () => {
 
       <!-- Gallery grid -->
       <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
-        <div
-          v-for="(image, index) in currentImages()"
-          :key="index"
-          @click="openLightbox(image)"
-          class="relative group cursor-pointer overflow-hidden rounded-xl aspect-square bg-gray-200"
-        >
-          <img
-            :src="image"
-            :alt="`交貨照片 ${currentPage * imagesPerPage + index + 1}`"
-            class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
-            loading="lazy"
-          />
-          <div class="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-colors flex items-center justify-center">
-            <ZoomIn class="w-8 h-8 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
-          </div>
-        </div>
+        <Dialog v-for="(image, index) in currentPageSize" :key="index">
+          <DialogTrigger as-child>
+            <div
+              class="relative group cursor-pointer overflow-hidden rounded-xl aspect-square bg-gray-200"
+            >
+              <img
+                :src="image"
+                :alt="`交貨照片 ${(currentPage - 1) * 6 + index + 1}`"
+                class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
+                loading="lazy"
+              />
+              <div class="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-colors flex items-center justify-center">
+                <ZoomIn class="w-8 h-8 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
+              </div>
+            </div>
+          </DialogTrigger>
+          <DialogContent class="max-w-4xl">
+            <img
+              :src="image"
+              alt="放大圖片"
+              class="w-full h-auto object-contain"
+            />
+          </DialogContent>
+        </Dialog>
       </div>
 
       <!-- Pagination -->
       <div class="flex items-center justify-center gap-4 mt-8">
-        <button
-          @click="prevPage"
-          :disabled="currentPage === 0"
-          :class="[
-            'flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors',
-            currentPage === 0 
-              ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
-              : 'bg-emerald-100 text-emerald-700 hover:bg-emerald-200'
-          ]"
+        <Button
+          @click="prev()"
+          :disabled="isFirstPage"
+          variant="outline"
+          size="lg"
         >
-          <ChevronLeft class="w-5 h-5" />
+          <ChevronLeft class="w-5 h-5 mr-2" />
           上一頁
-        </button>
+        </Button>
         
         <span class="text-gray-600">
-          {{ currentPage + 1 }} / {{ totalPages }}
+          {{ currentPage }} / {{ pageCount }}
         </span>
 
-        <button
-          @click="nextPage"
-          :disabled="currentPage >= totalPages - 1"
-          :class="[
-            'flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors',
-            currentPage >= totalPages - 1
-              ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
-              : 'bg-emerald-100 text-emerald-700 hover:bg-emerald-200'
-          ]"
+        <Button
+          @click="next()"
+          :disabled="isLastPage"
+          variant="outline"
+          size="lg"
         >
           下一頁
-          <ChevronRight class="w-5 h-5" />
-        </button>
+          <ChevronRight class="w-5 h-5 ml-2" />
+        </Button>
       </div>
     </div>
-
-    <!-- Lightbox -->
-    <Teleport to="body">
-      <div
-        v-if="selectedImage"
-        class="fixed inset-0 z-50 flex items-center justify-center bg-black/90"
-        @click.self="closeLightbox"
-      >
-        <button
-          @click="closeLightbox"
-          class="absolute top-4 right-4 text-white hover:text-gray-300 transition-colors"
-        >
-          <X class="w-8 h-8" />
-        </button>
-        <img
-          :src="selectedImage"
-          alt="放大圖片"
-          class="max-w-full max-h-[90vh] object-contain"
-        />
-      </div>
-    </Teleport>
   </section>
 </template>

@@ -1,6 +1,9 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { MapPin, Phone, Mail, Send, Loader2 } from 'lucide-vue-next'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Textarea } from '@/components/ui/textarea'
 
 const formData = ref({
   name: '',
@@ -124,12 +127,11 @@ const handleSubmit = async () => {
               <label for="name" class="block text-sm font-medium text-gray-700 mb-2">
                 姓名 <span class="text-red-500">*</span>
               </label>
-              <input
+              <Input
                 id="name"
                 v-model="formData.name"
                 type="text"
                 required
-                class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all"
                 placeholder="請輸入您的姓名"
               />
             </div>
@@ -138,12 +140,11 @@ const handleSubmit = async () => {
               <label for="phone" class="block text-sm font-medium text-gray-700 mb-2">
                 電話 <span class="text-red-500">*</span>
               </label>
-              <input
+              <Input
                 id="phone"
                 v-model="formData.phone"
                 type="tel"
                 required
-                class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all"
                 placeholder="請輸入您的電話"
               />
             </div>
@@ -152,29 +153,24 @@ const handleSubmit = async () => {
               <label for="message" class="block text-sm font-medium text-gray-700 mb-2">
                 訊息
               </label>
-              <textarea
+              <Textarea
                 id="message"
                 v-model="formData.message"
                 rows="4"
-                class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all resize-none"
                 placeholder="請輸入您的訊息..."
-              ></textarea>
+              />
             </div>
 
-            <button
+            <Button
               type="submit"
               :disabled="isSubmitting"
-              :class="[
-                'w-full flex items-center justify-center gap-2 py-4 rounded-xl font-bold text-lg transition-all',
-                isSubmitting 
-                  ? 'bg-gray-400 cursor-not-allowed' 
-                  : 'bg-emerald-600 hover:bg-emerald-700 text-white'
-              ]"
+              class="w-full py-6 text-lg"
+              size="lg"
             >
-              <Loader2 v-if="isSubmitting" class="w-5 h-5 animate-spin" />
-              <Send v-else class="w-5 h-5" />
+              <Loader2 v-if="isSubmitting" class="w-5 h-5 animate-spin mr-2" />
+              <Send v-else class="w-5 h-5 mr-2" />
               {{ isSubmitting ? '傳送中...' : '提交' }}
-            </button>
+            </Button>
 
             <div 
               v-if="submitStatus === 'success'"

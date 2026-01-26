@@ -73,8 +73,7 @@ import { Heart } from 'lucide-vue-next'
       <!-- Copyright -->
       <div class="border-t border-gray-800 pt-8 text-center">
         <p class="text-gray-400 flex items-center justify-center gap-1">
-          © {{ new Date().getFullYear() }} 大倉代領股東紀念品. Made with
-          <Heart class="w-4 h-4 text-red-500 fill-current" />
+          © {{ new Date().getFullYear() }} 大倉代領股東紀念品.
         </p>
       </div>
     </div>

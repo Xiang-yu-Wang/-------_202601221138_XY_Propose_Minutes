@@ -1,20 +1,33 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { useToggle, useEventListener } from '@vueuse/core'
 import { Menu, X } from 'lucide-vue-next'
+import { Button } from '@/components/ui/button'
+import { useScrollSpy } from '@/composables/useScrollSpy'
 
-const isMenuOpen = ref(false)
+const [isMenuOpen, toggleMenu] = useToggle(false)
 
 const navItems = [
-  { name: '首頁', href: '#hero' },
-  { name: '服務介紹', href: '#services' },
-  { name: '方案說明', href: '#plans' },
-  { name: '交貨實績', href: '#gallery' },
-  { name: '聯絡我們', href: '#contact' },
+  { name: '首頁', href: '#hero', id: 'hero' },
+  { name: '服務介紹', href: '#services', id: 'services' },
+  { name: '方案說明', href: '#plans', id: 'plans' },
+  { name: '交貨實績', href: '#gallery', id: 'gallery' },
+  { name: '聯絡我們', href: '#contact', id: 'contact' },
 ]
 
-const toggleMenu = () => {
-  isMenuOpen.value = !isMenuOpen.value
+// Use VueUse scroll spy to track active section
+const { activeSection } = useScrollSpy(navItems.map(item => item.id))
+
+// Close menu on navigation click
+const closeMenu = () => {
+  isMenuOpen.value = false
 }
+
+// Close menu on escape key
+useEventListener('keydown', (e) => {
+  if (e.key === 'Escape' && isMenuOpen.value) {
+    closeMenu()
+  }
+})
 </script>
 
 <template>
@@ -33,9 +46,16 @@ const toggleMenu = () => {
               v-for="item in navItems"
               :key="item.name"
               :href="item.href"
-              class="text-gray-700 hover:text-emerald-600 transition-colors font-medium"
+              :class="[
+                'text-gray-700 hover:text-emerald-600 transition-colors font-medium relative',
+                activeSection === item.id && 'text-emerald-600'
+              ]"
             >
               {{ item.name }}
+              <span 
+                v-if="activeSection === item.id"
+                class="absolute -bottom-1 left-0 right-0 h-0.5 bg-emerald-600"
+              />
             </a>
             <a
               href="https://www.facebook.com/groups/call0982571134"
@@ -49,13 +69,15 @@ const toggleMenu = () => {
 
         <!-- Mobile menu button -->
         <div class="md:hidden">
-          <button
-            @click="toggleMenu"
-            class="text-gray-700 hover:text-emerald-600 p-2"
+          <Button
+            @click="toggleMenu()"
+            variant="ghost"
+            size="icon"
+            class="text-gray-700 hover:text-emerald-600"
           >
             <Menu v-if="!isMenuOpen" class="w-6 h-6" />
             <X v-else class="w-6 h-6" />
-          </button>
+          </Button>
         </div>
       </div>
     </div>
@@ -67,7 +89,7 @@ const toggleMenu = () => {
           v-for="item in navItems"
           :key="item.name"
           :href="item.href"
-          @click="isMenuOpen = false"
+          @click="closeMenu"
           class="block py-2 text-gray-700 hover:text-emerald-600 transition-colors"
         >
           {{ item.name }}

@@ -26,7 +26,7 @@ src/
 ├── App.vue               # Main component, composes all sections
 ├── main.ts              # App entry point
 ├── style.css            # Tailwind v4 + theme variables (OKLCH color space)
-├── components/          # All page sections (no subdirectories)
+├── components/          # Page sections and UI components
 │   ├── Navbar.vue
 │   ├── HeroSection.vue
 │   ├── ServicesSection.vue
@@ -34,7 +34,16 @@ src/
 │   ├── GallerySection.vue
 │   ├── AdvantagesSection.vue
 │   ├── ContactSection.vue
-│   └── FooterSection.vue
+│   ├── FooterSection.vue
+│   └── ui/              # shadcn-vue components
+│       ├── button/
+│       ├── card/
+│       ├── input/
+│       ├── textarea/
+│       ├── dialog/
+│       └── badge/
+├── composables/         # Custom VueUse composables
+│   └── useScrollSpy.ts  # Scroll spy for active section tracking
 └── lib/
     └── utils.ts         # Contains cn() utility for class merging
 ```
@@ -45,13 +54,24 @@ src/
 All components use **Vue 3 Composition API** with `<script setup lang="ts">`:
 ```vue
 <script setup lang="ts">
+import { useToggle, useEventListener } from '@vueuse/core'
 import { Phone, MessageCircle } from 'lucide-vue-next'
-// Reactive state, computed, functions here
+import { Button } from '@/components/ui/button'
+
+// VueUse composables for reactive state
+const [isOpen, toggle] = useToggle(false)
+
+// Event listeners with auto-cleanup
+useEventListener('keydown', (e) => {
+  if (e.key === 'Escape') handleEscape()
+})
 </script>
 
 <template>
-  <!-- Single root element with semantic HTML -->
+  <!-- Use shadcn-vue components -->
   <section id="hero" class="...">
+    <Button @click="toggle()" variant="outline">Toggle</Button>
+  </section>
 </template>
 ```
 
@@ -64,6 +84,9 @@ import { Phone, MessageCircle } from 'lucide-vue-next'
 
 ### Component Patterns
 - **Section-based architecture** - Each major page section is a separate component
+- **VueUse composables** - Use VueUse for state management, event handling, and utilities
+- **shadcn-vue components** - Prefer shadcn-vue components over native HTML elements
+- **Custom composables** - Create reusable logic in `src/composables/` (e.g., `useScrollSpy`)
 - **No prop drilling** - Hardcoded content (marketing site, not data-driven)
 - **Lucide icons** - Import specific icons: `import { Icon } from 'lucide-vue-next'`
 - **Smooth scrolling** - Anchor links with `html { scroll-behavior: smooth }` in App.vue
@@ -122,13 +145,125 @@ Components are added to `src/components/ui/` with path alias `@/components/ui`
 4. **Mobile-first responsive** - Grid switches from stacked to side-by-side with `md:` prefix
 5. **Accessibility**: Semantic HTML (section, nav, footer), alt text on images
 
+## VueUse Usage Patterns
+
+### State Management
+```typescript
+// Prefer useToggle over manual ref toggle
+const [isOpen, toggle] = useToggle(false)
+
+// Use computed for reactive calculations
+const pageCount = computed(() => Math.ceil(items.length / pageSize))
+```
+
+### Event Handling
+```typescript
+// Declarative event listeners with auto-cleanup
+useEventListener('keydown', (e) => {
+  if (e.key === 'Escape') handleEscape()
+})
+
+// Throttle expensive operations
+const updateSection = useThrottleFn(() => {
+  // Expensive scroll handler
+}, 100)
+```
+
+### Utilities
+```typescript
+// Page title management
+useTitle('Page Title')
+
+// Scroll tracking
+const { y } = useScroll(window)
+```
+
+### Custom Composables
+Create reusable logic in `src/composables/`:
+```typescript
+// useScrollSpy.ts
+export function useScrollSpy(sectionIds: string[]) {
+  const activeSection = ref<string>('')
+  const { y } = useScroll(window)
+  // Implementation...
+  return { activeSection, y }
+}
+```
+
+## shadcn-vue Components
+
+### Available Components
+- **Button** - `import { Button } from '@/components/ui/button'`
+- **Card** - `import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'`
+- **Input** - `import { Input } from '@/components/ui/input'`
+- **Textarea** - `import { Textarea } from '@/components/ui/textarea'`
+- **Dialog** - `import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog'`
+- **Badge** - `import { Badge } from '@/components/ui/badge'`
+
+### Usage Examples
+```vue
+<!-- Button with variants -->
+<Button variant="outline" size="lg" @click="handleClick">
+  Click me
+</Button>
+
+<!-- Card structure -->
+<Card>
+  <CardHeader>
+    <CardTitle>Title</CardTitle>
+  </CardHeader>
+  <CardContent>
+    Content here
+  </CardContent>
+</Card>
+
+<!-- Dialog with trigger -->
+<Dialog>
+  <DialogTrigger as-child>
+    <Button>Open</Button>
+  </DialogTrigger>
+  <DialogContent>
+    Dialog content
+  </DialogContent>
+</Dialog>
+```
+
+### Adding New Components
+```bash
+bunx --bun shadcn-vue@latest add [component-name]
+```
+
 ## Common Tasks
 
 ### Adding a new section
 1. Create component in `src/components/[Name]Section.vue`
-2. Import in `App.vue`
-3. Add to template between `<main>` tags
-4. Add anchor link in `Navbar.vue` if needed
+2. Use VueUse composables and shadcn-vue components
+3. Import in `App.vue`
+4. Add to template between `<main>` tags
+5. Add anchor link in `Navbar.vue` if needed
+6. Update `useScrollSpy` section IDs if needed
+
+### Creating a custom composable
+1. Create file in `src/composables/use[Name].ts`
+2. Use VueUse utilities as building blocks
+3. Export typed return values
+4. Import and use in components:
+   ```typescript
+   import { useScrollSpy } from '@/composables/useScrollSpy'
+   const { activeSection } = useScrollSpy(['hero', 'services'])
+   ```
+
+### Adding shadcn-vue components
+1. Install component: `bunx --bun shadcn-vue@latest add [component-name]`
+2. Import in component: `import { Component } from '@/components/ui/component'`
+3. Use with TypeScript props and variants
+
+### Refactoring to use VueUse
+- Replace `ref` + manual toggle → `useToggle()`
+- Replace `addEventListener` → `useEventListener()`
+- Replace manual pagination → computed values
+- Replace manual scroll tracking → `useScroll()`
+- Throttle expensive operations → `useThrottleFn()`
 
 ### Modifying colors
 Edit CSS variables in `src/style.css` (OKLCH format) under `:root` or `.dark`

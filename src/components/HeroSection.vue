@@ -61,12 +61,5 @@ import { Phone, MessageCircle, Gift, CheckCircle } from 'lucide-vue-next'
         </p>
       </div>
     </div>
-
-    <!-- Scroll indicator -->
-    <div class="absolute bottom-8 left-1/2 -translate-x-1/2 animate-bounce">
-      <div class="w-6 h-10 border-2 border-white/50 rounded-full flex justify-center">
-        <div class="w-1 h-3 bg-white/50 rounded-full mt-2 animate-pulse"></div>
-      </div>
-    </div>
   </section>
 </template>
