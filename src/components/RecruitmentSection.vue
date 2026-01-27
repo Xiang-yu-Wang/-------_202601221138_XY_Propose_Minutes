@@ -1,10 +1,6 @@
 <script setup lang="ts">
 import { Briefcase, Check } from 'lucide-vue-next'
-import { ref } from 'vue'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Textarea } from '@/components/ui/textarea'
 
 interface JobPosition {
   id: number
@@ -60,44 +56,6 @@ const positions: JobPosition[] = [
     description: '負責商品入庫、分類、打包、出貨與交貨記錄管理。'
   }
 ]
-
-const formData = ref({
-  name: '',
-  phone: '',
-  email: '',
-  position: '',
-  message: ''
-})
-
-const isSubmitting = ref(false)
-const submitSuccess = ref(false)
-
-const submitForm = async () => {
-  if (!formData.value.name || !formData.value.phone || !formData.value.position) {
-    alert('請填寫必填欄位：姓名、電話、應徵職位')
-    return
-  }
-
-  isSubmitting.value = true
-  
-  // 模擬提交延遲
-  setTimeout(() => {
-    submitSuccess.value = true
-    isSubmitting.value = false
-    
-    // 重置表單
-    setTimeout(() => {
-      formData.value = {
-        name: '',
-        phone: '',
-        email: '',
-        position: '',
-        message: ''
-      }
-      submitSuccess.value = false
-    }, 2000)
-  }, 800)
-}
 </script>
 
 <template>
@@ -145,101 +103,6 @@ const submitForm = async () => {
         </Card>
       </div>
 
-      <!-- Application Form -->
-      <div class="max-w-3xl mx-auto bg-white rounded-xl shadow-lg p-8">
-        <h3 class="text-2xl font-bold text-gray-900 mb-6">應徵表單</h3>
-
-        <div v-if="submitSuccess" class="mb-6 p-4 bg-emerald-50 border-l-4 border-emerald-600 rounded">
-          <p class="text-emerald-800 font-semibold">✓ 感謝您的應徵！</p>
-          <p class="text-sm text-emerald-700 mt-1">我們會在 3-5 個工作天內與您聯絡。</p>
-        </div>
-
-        <form @submit.prevent="submitForm" class="space-y-4">
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <!-- Name -->
-            <div>
-              <label class="block text-sm font-medium text-gray-900 mb-1">
-                姓名 <span class="text-red-500">*</span>
-              </label>
-              <Input
-                v-model="formData.name"
-                type="text"
-                placeholder="請輸入您的全名"
-                required
-              />
-            </div>
-
-            <!-- Phone -->
-            <div>
-              <label class="block text-sm font-medium text-gray-900 mb-1">
-                電話 <span class="text-red-500">*</span>
-              </label>
-              <Input
-                v-model="formData.phone"
-                type="tel"
-                placeholder="例：0912-345-678"
-                required
-              />
-            </div>
-          </div>
-
-          <!-- Email -->
-          <div>
-            <label class="block text-sm font-medium text-gray-900 mb-1">
-              信箱 <span class="text-gray-500">(選填)</span>
-            </label>
-            <Input
-              v-model="formData.email"
-              type="email"
-              placeholder="example@email.com"
-            />
-          </div>
-
-          <!-- Position -->
-          <div>
-            <label class="block text-sm font-medium text-gray-900 mb-1">
-              應徵職位 <span class="text-red-500">*</span>
-            </label>
-            <select
-              v-model="formData.position"
-              class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-emerald-600 focus:border-emerald-600"
-              required
-            >
-              <option value="">-- 請選擇職位 --</option>
-              <option v-for="job in positions" :key="job.id" :value="job.title">
-                {{ job.title }} ({{ job.salary }})
-              </option>
-            </select>
-          </div>
-
-          <!-- Message -->
-          <div>
-            <label class="block text-sm font-medium text-gray-900 mb-1">
-              自我介紹或備註 <span class="text-gray-500">(選填)</span>
-            </label>
-            <Textarea
-              v-model="formData.message"
-              placeholder="介紹您的經驗、為什麼對這份工作感興趣..."
-              class="h-28"
-            />
-          </div>
-
-          <!-- Submit Button -->
-          <div class="pt-4">
-            <Button
-              type="submit"
-              :disabled="isSubmitting"
-              class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-3"
-            >
-              {{ isSubmitting ? '送出中...' : '提交應徵' }}
-            </Button>
-            <p class="text-xs text-gray-500 mt-3 text-center">
-              或直接聯絡：LINE @792nvftc | 電話 0982-571-134（贊哥）
-            </p>
-          </div>
-        </form>
-      </div>
-
       <!-- Additional Info -->
       <div class="mt-12 bg-blue-50 border-l-4 border-blue-600 rounded-lg p-6 max-w-2xl mx-auto">
         <h4 class="font-bold text-blue-900 mb-3">💡 招募說明</h4>
@@ -249,6 +112,9 @@ const submitForm = async () => {
           <li>✓ 提供完整培訓與工作支援</li>
           <li>✓ 歡迎應屆畢業生應徵（提供新人培訓）</li>
         </ul>
+        <p class="text-sm text-blue-900 font-semibold mt-4">
+          有意願者，歡迎洽詢：LINE @792nvftc | 電話 0982-571-134（贊哥）
+        </p>
       </div>
     </div>
   </section>
