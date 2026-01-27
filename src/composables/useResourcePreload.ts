@@ -50,23 +50,43 @@ export function dnsPrefetch(domain: string) {
 }
 
 /**
- * 報告 Core Web Vitals（用於監控性能）
- * 僅在開發環境啟用
+ * Core Web Vitals 回調函數類型
  */
-export function reportWebVitals() {
+type WebVitalsCallback = (metric: { name: string; value: number; rating?: string }) => void
+
+/**
+ * 報告 Core Web Vitals（用於監控性能）
+ * 僅在開發環境啟用，生產環境不執行
+ * @param callback - 可選的回調函數，用於自定義處理性能數據
+ */
+export function reportWebVitals(callback?: WebVitalsCallback) {
   if (typeof window === 'undefined' || import.meta.env.PROD) return
 
   // 監控 Cumulative Layout Shift (CLS)
   new PerformanceObserver((entryList) => {
     for (const entry of entryList.getEntries()) {
-      console.info('CLS:', entry)
+      const cls = (entry as any).value
+      if (callback) {
+        callback({
+          name: 'CLS',
+          value: cls,
+          rating: cls < 0.1 ? 'good' : cls < 0.25 ? 'needs-improvement' : 'poor'
+        })
+      }
     }
   }).observe({ entryTypes: ['layout-shift'] })
 
   // 監控 First Input Delay (FID)
   new PerformanceObserver((entryList) => {
     for (const entry of entryList.getEntries()) {
-      console.info('FID:', entry)
+      const fid = (entry as any).processingStart - (entry as any).startTime
+      if (callback) {
+        callback({
+          name: 'FID',
+          value: fid,
+          rating: fid < 100 ? 'good' : fid < 300 ? 'needs-improvement' : 'poor'
+        })
+      }
     }
   }).observe({ entryTypes: ['first-input'] })
 
@@ -74,6 +94,13 @@ export function reportWebVitals() {
   new PerformanceObserver((entryList) => {
     const entries = entryList.getEntries()
     const lastEntry = entries[entries.length - 1]
-    console.info('LCP:', lastEntry)
+    const lcp = (lastEntry as any).renderTime || (lastEntry as any).loadTime
+    if (callback) {
+      callback({
+        name: 'LCP',
+        value: lcp,
+        rating: lcp < 2500 ? 'good' : lcp < 4000 ? 'needs-improvement' : 'poor'
+      })
+    }
   }).observe({ entryTypes: ['largest-contentful-paint'] })
 }

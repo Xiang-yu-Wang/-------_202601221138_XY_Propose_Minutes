@@ -13,7 +13,9 @@ useSEO()
 // 啟用 JSON-LD 結構化資料（Google Rich Results）
 useJsonLd()
 
-// 啟用 Web Vitals 監控（開發環境）
+// 啟用 Web Vitals 監控（開發環境，靜默模式）
+// 如需查看性能數據，請傳入回調函數：
+// reportWebVitals((metric) => console.log(metric))
 onMounted(() => {
   if (import.meta.env.DEV) {
     reportWebVitals()
