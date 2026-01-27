@@ -21,8 +21,15 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     
-    <!-- 可選：使用 Google Fonts Noto Sans TC（僅在系統無該字體時載入）-->
-    <!-- font-display: swap 避免 FOIT (Flash of Invisible Text) 和 FOUT (Flash of Unstyled Text) -->
+    <!-- 預載入關鍵中文字體（700 weight，最常用子集） -->
+    <!-- 優先載入最常用的字形以減少 FCP/LCP 延遲 -->
+    <link rel="preload" as="font" type="font/woff2" crossorigin
+      href="https://fonts.gstatic.com/s/notosanstc/v39/-nF7OG829Oofr2wohFbTp9iFOkMQAewlpbGXhhyYs0QF3kPVyLylzU95vTq1Ltj5xQez1g.119.woff2" />
+    <link rel="preload" as="font" type="font/woff2" crossorigin
+      href="https://fonts.gstatic.com/s/notosanstc/v39/-nF7OG829Oofr2wohFbTp9iFOkMQAewlpbGXhhyYs0QF3kPVyLylzU95vTq1Ltj5xQez1g.118.woff2" />
+    
+    <!-- Google Fonts Noto Sans TC（僅在系統無該字體時載入）-->
+    <!-- font-display: swap 避免 FOIT (Flash of Invisible Text) -->
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
     
     <!-- 預加載關鍵英雄圖片（響應式） -->

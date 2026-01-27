@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>圖片格式降級測試</title>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+      background: #f5f5f5;
+    }
+    .test-section {
+      background: white;
+      padding: 20px;
+      margin-bottom: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .test-result {
+      margin: 10px 0;
+      padding: 10px;
+      border-radius: 4px;
+      font-family: monospace;
+    }
+    .success { background: #d4edda; color: #155724; }
+    .error { background: #f8d7da; color: #721c24; }
+    .info { background: #d1ecf1; color: #0c5460; }
+    img {
+      max-width: 100%;
+      height: auto;
+      display: block;
+      margin: 10px 0;
+      border: 2px solid #ddd;
+      border-radius: 4px;
+    }
+    h2 { color: #059669; }
+    code {
+      background: #f4f4f4;
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-size: 0.9em;
+    }
+  </style>
+</head>
+<body>
+  <h1>📸 響應式圖片格式降級測試</h1>
+  <p>這個頁面測試 Picture 元素的格式降級邏輯（AVIF → WebP → JPEG）</p>
+
+  <!-- Test 1: Hero Image with Picture -->
+  <div class="test-section">
+    <h2>測試 1: Hero 背景圖（AVIF → WebP → JPEG）</h2>
+    <div class="test-result info" id="hero-result">檢測中...</div>
+    
+    <picture>
+      <!-- AVIF -->
+      <source 
+        srcset="https://images.unsplash.com/photo-1553729459-efe14ef6055d?auto=format&fit=crop&w=640&q=80&fm=avif 640w,
+                https://images.unsplash.com/photo-1553729459-efe14ef6055d?auto=format&fit=crop&w=1280&q=80&fm=avif 1280w"
+        type="image/avif"
+        id="hero-avif"
+      />
+      <!-- WebP -->
+      <source 
+        srcset="https://images.unsplash.com/photo-1553729459-efe14ef6055d?auto=format&fit=crop&w=640&q=80&fm=webp 640w,
+                https://images.unsplash.com/photo-1553729459-efe14ef6055d?auto=format&fit=crop&w=1280&q=80&fm=webp 1280w"
+        type="image/webp"
+        id="hero-webp"
+      />
+      <!-- JPEG Fallback -->
+      <img 
+        srcset="https://images.unsplash.com/photo-1553729459-efe14ef6055d?auto=format&fit=crop&w=640&q=80 640w,
+                https://images.unsplash.com/photo-1553729459-efe14ef6055d?auto=format&fit=crop&w=1280&q=80 1280w"
+        src="https://images.unsplash.com/photo-1553729459-efe14ef6055d?auto=format&fit=crop&w=1280&q=80"
+        alt="Hero Background"
+        sizes="(max-width: 768px) 100vw, 1200px"
+        id="hero-img"
+        onload="reportFormat('hero', this.currentSrc)"
+        onerror="reportError('hero', this.currentSrc)"
+      />
+    </picture>
+  </div>
+
+  <!-- Test 2: Gallery Image -->
+  <div class="test-section">
+    <h2>測試 2: Gallery 圖片（WebP → JPEG）</h2>
+    <div class="test-result info" id="gallery-result">檢測中...</div>
+    
+    <picture>
+      <source 
+        srcset="https://custom-images.strikinglycdn.com/res/hrscywv4p/image/upload/c_limit,fl_lossy,h_9000,w_1200,f_webp,q_auto/8989695/442962_244577.png 1200w"
+        type="image/webp"
+      />
+      <img 
+        src="https://custom-images.strikinglycdn.com/res/hrscywv4p/image/upload/c_limit,fl_lossy,h_9000,w_1200,f_auto,q_auto/8989695/442962_244577.png"
+        alt="Gallery Item"
+        id="gallery-img"
+        onload="reportFormat('gallery', this.currentSrc)"
+        onerror="reportError('gallery', this.currentSrc)"
+      />
+    </picture>
+  </div>
+
+  <!-- Test 3: Browser Support Detection -->
+  <div class="test-section">
+    <h2>測試 3: 瀏覽器格式支援檢測</h2>
+    <div class="test-result info" id="browser-support">檢測中...</div>
+  </div>
+
+  <!-- Test 4: CDN Response Test -->
+  <div class="test-section">
+    <h2>測試 4: CDN 響應測試</h2>
+    <div class="test-result info" id="cdn-test">檢測中...</div>
+  </div>
+
+  <script>
+    // 報告圖片格式
+    function reportFormat(testName, url) {
+      const resultDiv = document.getElementById(`${testName}-result`);
+      let format = 'JPEG';
+      
+      if (url.includes('fm=avif') || url.includes('f_avif')) {
+        format = 'AVIF';
+      } else if (url.includes('fm=webp') || url.includes('f_webp') || url.includes('.webp')) {
+        format = 'WebP';
+      }
+      
+      resultDiv.className = 'test-result success';
+      resultDiv.innerHTML = `
+        ✅ 成功載入 <code>${format}</code> 格式<br>
+        <small>URL: ${url.substring(0, 80)}...</small>
+      `;
+    }
+
+    // 報告錯誤
+    function reportError(testName, url) {
+      const resultDiv = document.getElementById(`${testName}-result`);
+      resultDiv.className = 'test-result error';
+      resultDiv.innerHTML = `
+        ❌ 載入失敗<br>
+        <small>URL: ${url.substring(0, 80)}...</small>
+      `;
+    }
+
+    // 檢測瀏覽器格式支援
+    async function detectBrowserSupport() {
+      const resultDiv = document.getElementById('browser-support');
+      const formats = {
+        'AVIF': 'data:image/avif;base64,AAAAIGZ0eXBhdmlmAAAAAGF2aWZtaWYxbWlhZk1BMUIAAADybWV0YQAAAAAAAAAoaGRscgAAAAAAAAAAcGljdAAAAAAAAAAAAAAAAGxpYmF2aWYAAAAADnBpdG0AAAAAAAEAAAAeaWxvYwAAAABEAAABAAEAAAABAAABGgAAAB0AAAAoaWluZgAAAAAAAQAAABppbmZlAgAAAAABAABhdjAxQ29sb3IAAAAAamlwcnAAAABLaXBjbwAAABRpc3BlAAAAAAAAAAIAAAACAAAAEHBpeGkAAAAAAwgICAAAAAxhdjFDgQ0MAAAAABNjb2xybmNseAACAAIAAYAAAAAXaXBtYQAAAAAAAAABAAEEAQKDBAAAACVtZGF0EgAKCBgANogQEAwgMg8f8D///8WfhwB8+ErK42A=',
+        'WebP': 'data:image/webp;base64,UklGRiQAAABXRUJQVlA4IBgAAAAwAQCdASoBAAEAAwA0JaQAA3AA/vuUAAA=',
+      };
+
+      const support = {};
+      
+      for (const [format, dataUrl] of Object.entries(formats)) {
+        try {
+          const img = new Image();
+          const promise = new Promise((resolve) => {
+            img.onload = () => resolve(true);
+            img.onerror = () => resolve(false);
+          });
+          img.src = dataUrl;
+          support[format] = await promise;
+        } catch {
+          support[format] = false;
+        }
+      }
+
+      const browserInfo = {
+        userAgent: navigator.userAgent,
+        avif: support.AVIF,
+        webp: support.WebP,
+      };
+
+      let html = `
+        <strong>瀏覽器: </strong>${getBrowserName()}<br>
+        <strong>AVIF 支援: </strong>${support.AVIF ? '✅ 是' : '❌ 否'}<br>
+        <strong>WebP 支援: </strong>${support.WebP ? '✅ 是' : '❌ 否'}<br>
+        <strong>降級邏輯: </strong>
+      `;
+
+      if (support.AVIF) {
+        html += '<code>AVIF</code> (最優)';
+      } else if (support.WebP) {
+        html += '<code>WebP</code> (備選)';
+      } else {
+        html += '<code>JPEG</code> (降級)';
+      }
+
+      resultDiv.className = 'test-result success';
+      resultDiv.innerHTML = html;
+    }
+
+    // 獲取瀏覽器名稱
+    function getBrowserName() {
+      const ua = navigator.userAgent;
+      if (ua.includes('Chrome')) return 'Chrome';
+      if (ua.includes('Firefox')) return 'Firefox';
+      if (ua.includes('Safari') && !ua.includes('Chrome')) return 'Safari';
+      if (ua.includes('Edge')) return 'Edge';
+      return 'Unknown';
+    }
+
+    // 測試 CDN 響應
+    async function testCDN() {
+      const resultDiv = document.getElementById('cdn-test');
+      const testUrls = [
+        'https://images.unsplash.com/photo-1553729459-efe14ef6055d?auto=format&fit=crop&w=640&q=80&fm=avif',
+        'https://images.unsplash.com/photo-1553729459-efe14ef6055d?auto=format&fit=crop&w=640&q=80&fm=webp',
+        'https://custom-images.strikinglycdn.com/res/hrscywv4p/image/upload/c_limit,fl_lossy,h_300,w_300,f_webp,q_auto/8989695/442962_244577.png',
+      ];
+
+      let html = '';
+      for (const url of testUrls) {
+        try {
+          const start = performance.now();
+          const response = await fetch(url, { method: 'HEAD' });
+          const duration = Math.round(performance.now() - start);
+          
+          const formatMatch = url.match(/fm=(\w+)|f_(\w+)|\.(\w+)/);
+          const format = formatMatch ? (formatMatch[1] || formatMatch[2] || formatMatch[3]).toUpperCase() : 'UNKNOWN';
+          
+          if (response.ok) {
+            html += `✅ ${format}: ${duration}ms (${response.headers.get('content-type')})<br>`;
+          } else {
+            html += `❌ ${format}: HTTP ${response.status}<br>`;
+          }
+        } catch (error) {
+          html += `❌ 請求失敗: ${error.message}<br>`;
+        }
+      }
+
+      resultDiv.className = 'test-result success';
+      resultDiv.innerHTML = html;
+    }
+
+    // 執行所有測試
+    window.addEventListener('load', async () => {
+      await detectBrowserSupport();
+      await testCDN();
+    });
+  </script>
+</body>
+</html>
