@@ -13,12 +13,21 @@ import { galleryImages } from '@/data/gallery'
 const currentPage = ref(1)
 const pageSize = 6
 
-// 生成響應式縮圖 srcset
-const widths = [320, 480, 640, 960, 1200]
-const buildSrcSet = (url: string) =>
-  widths.map(w => `${url.replace(/w_\d+/, `w_${w}`)} ${w}w`).join(', ')
+// 優化圖片 URL 支援多格式
+const buildOptimizedUrl = (url: string, width: number, format: string = 'auto') => {
+  // Strikingly CDN 已支援 webp/avif，直接修改參數
+  if (url.includes('strikinglycdn.com')) {
+    return url.replace(/w_\d+/, `w_${width}`).replace(/f_auto/, `f_${format}`)
+  }
+  return url
+}
 
-const thumbnailUrl = (url: string) => url.replace(/w_\d+/, 'w_640')
+// 生成響應式縮圖 srcset（支援多格式）
+const widths = [320, 480, 640, 960, 1200]
+const buildSrcSet = (url: string, format: string = 'auto') =>
+  widths.map(w => `${buildOptimizedUrl(url, w, format)} ${w}w`).join(', ')
+
+const thumbnailUrl = (url: string) => buildOptimizedUrl(url, 640, 'auto')
 
 // Computed pagination values
 const pageCount = computed(() => Math.ceil(galleryImages.length / pageSize))
@@ -60,7 +69,7 @@ const next = () => {
             >
               <img
                 :src="thumbnailUrl(image)"
-                :srcset="buildSrcSet(image)"
+                :srcset="buildSrcSet(image, 'auto')"
                 sizes="(max-width: 768px) 50vw, 360px"
                 :alt="`交貨照片 ${(currentPage - 1) * 6 + index + 1}`"
                 class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
@@ -73,11 +82,18 @@ const next = () => {
             </div>
           </DialogTrigger>
           <DialogContent class="max-w-4xl">
-            <img
-              :src="image"
-              alt="放大圖片"
-              class="w-full h-auto object-contain"
-            />
+            <!-- Optimized lightbox image with picture element -->
+            <picture>
+              <source :srcset="buildSrcSet(image, 'webp')" type="image/webp" />
+              <source :srcset="buildSrcSet(image, 'auto')" type="image/jpeg" />
+              <img
+                :src="image"
+                alt="放大圖片"
+                class="w-full h-auto object-contain"
+                loading="lazy"
+                decoding="async"
+              />
+            </picture>
           </DialogContent>
         </Dialog>
       </div>
