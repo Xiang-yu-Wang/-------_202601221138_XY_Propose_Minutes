@@ -2,11 +2,22 @@ import path from 'node:path'
 import { defineConfig } from 'vite'
 import tailwindcss from '@tailwindcss/vite'
 import vue from '@vitejs/plugin-vue'
+import { visualizer } from 'rollup-plugin-visualizer'
 
 export default defineConfig({
   plugins: [
     vue(),
     tailwindcss(),
+    // Bundle 視覺化分析工具（僅在 ANALYZE=true 時啟用）
+    ...(process.env.ANALYZE === 'true'
+      ? [visualizer({
+          open: true,
+          gzipSize: true,
+          brotliSize: true,
+          filename: 'dist/stats.html',
+          template: 'treemap', // 'treemap' | 'sunburst' | 'network'
+        })]
+      : []),
     // Windows 環境下 gzip 壓縮工具易超時/崩潰，改為禁用
     // 部署時可在 Nginx/CDN 層級啟用壓縮（更穩定且高效）
     // ...(process.env.SKIP_COMPRESSION === 'true'
