@@ -2,7 +2,8 @@ User-agent: *
 Allow: /
 Disallow: /admin
 
-Sitemap: https://dakura-gifts.com.tw/sitemap.xml
+Sitemap: http://localhost:5173/sitemap.xml
 
-# 尊�? robots.txt，避?��?度爬??User-agent: *
+# 尊重 robots.txt，避免過度爬蟲
+User-agent: *
 Crawl-delay: 1

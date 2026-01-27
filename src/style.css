@@ -116,5 +116,38 @@
   }
   body {
     @apply bg-background text-foreground;
+    /* 優化的中文字體堆疊 */
+    font-family: 
+      -apple-system, BlinkMacSystemFont,
+      /* macOS/iOS 系統字體 */
+      "Segoe UI", Roboto,
+      /* Windows 系統字體 */
+      "Helvetica Neue", Arial,
+      /* 中文字體 - 優先使用系統字體避免下載 */
+      "Noto Sans TC", "Microsoft JhengHei", "PingFang TC",
+      "Heiti TC", "Apple LiGothic Medium",
+      /* 後備字體 */
+      sans-serif,
+      /* Emoji 字體 */
+      "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+    /* 字體渲染優化 */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+    /* 防止 CLS - 確保字體度量一致 */
+    font-feature-settings: "kern" 1;
+    font-kerning: normal;
+  }
+  
+  /* 標題使用稍微不同的字重，提升視覺層次 */
+  h1, h2, h3, h4, h5, h6 {
+    font-weight: 600;
+    /* 標題字體優化 */
+    letter-spacing: -0.02em;
+  }
+  
+  /* 確保按鈕和表單元素繼承字體 */
+  button, input, textarea, select {
+    font-family: inherit;
   }
 }
