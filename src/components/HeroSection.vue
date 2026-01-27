@@ -1,12 +1,33 @@
 <script setup lang="ts">
+import { ref } from 'vue'
 import { Phone, MessageCircle, Gift, CheckCircle } from 'lucide-vue-next'
+
+const imageLoaded = ref(false)
+const heroImageUrl = 'https://images.unsplash.com/photo-1553729459-efe14ef6055d?auto=format&fit=crop&w=1920&q=80'
 </script>
 
 <template>
   <section id="hero" class="relative min-h-screen flex items-center justify-center overflow-hidden pt-16">
     <!-- Background -->
     <div class="absolute inset-0 bg-gradient-to-br from-emerald-600 via-teal-600 to-cyan-700"></div>
-    <div class="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1553729459-efe14ef6055d?auto=format&fit=crop&w=1920&q=80')] bg-cover bg-center opacity-10"></div>
+    <!-- Background image with blur placeholder -->
+    <img 
+      :src="heroImageUrl"
+      alt="背景圖"
+      loading="lazy"
+      @load="imageLoaded = true"
+      :class="[
+        'absolute inset-0 w-full h-full object-cover opacity-10 transition-opacity duration-500',
+        imageLoaded ? 'opacity-10' : 'opacity-0'
+      ]"
+    />
+    <!-- Blur placeholder (visible until image loads) -->
+    <div 
+      :class="[
+        'absolute inset-0 w-full h-full object-cover opacity-10 bg-gradient-to-br from-emerald-600 via-teal-600 to-cyan-700 transition-opacity duration-500',
+        imageLoaded ? 'opacity-0' : 'opacity-100'
+      ]"
+    ></div>
     
     <!-- Floating decorations -->
     <div class="absolute top-20 left-10 w-64 h-64 bg-white/10 rounded-full blur-3xl"></div>

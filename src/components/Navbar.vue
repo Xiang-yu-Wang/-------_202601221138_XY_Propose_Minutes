@@ -8,6 +8,33 @@ import { navItems } from '@/data/navigation'
 const [isMenuOpen, toggleMenu] = useToggle(false)
 const route = useRoute()
 
+// Prefetch route components on hover
+const prefetchRoute = async (path: string) => {
+  // Map paths to their corresponding view imports
+  const routeMap: Record<string, () => Promise<any>> = {
+    '/': () => import('@/views/HomeView.vue'),
+    '/announcements': () => import('@/views/AnnouncementsView.vue'),
+    '/products': () => import('@/views/ProductsView.vue'),
+    '/recruitment': () => import('@/views/RecruitmentView.vue'),
+    '/community': () => import('@/views/CommunityView.vue'),
+    '/services': () => import('@/views/ServicesView.vue'),
+    '/plans': () => import('@/views/PlansView.vue'),
+    '/gallery': () => import('@/views/GalleryView.vue'),
+    '/upload': () => import('@/views/UploadView.vue'),
+    '/contact': () => import('@/views/ContactView.vue'),
+  }
+
+  const loader = routeMap[path]
+  if (loader) {
+    try {
+      await loader()
+    } catch (error) {
+      // Silently fail prefetch errors
+      void error
+    }
+  }
+}
+
 // Check if current route matches
 const isActive = (path: string) => {
   if (path === '/') {
@@ -45,6 +72,7 @@ useEventListener('keydown', (e) => {
               v-for="item in navItems"
               :key="item.name"
               :to="item.to"
+              @mouseenter="prefetchRoute(item.to)"
               :class="[
                 'text-gray-700 hover:text-emerald-600 transition-colors font-medium relative',
                 isActive(item.to) && 'text-emerald-600'

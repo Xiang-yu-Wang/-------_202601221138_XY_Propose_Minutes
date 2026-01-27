@@ -150,6 +150,7 @@ const googleFormUrl = 'https://forms.gle/eRKucMuQ8PCJawzX9'
                   <img 
                     :src="example.url" 
                     :alt="example.title"
+                    loading="lazy"
                     class="w-full h-full object-cover"
                   />
                 </div>

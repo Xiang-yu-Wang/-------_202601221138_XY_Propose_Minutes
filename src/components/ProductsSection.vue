@@ -31,6 +31,7 @@ const { cart, addToCart, removeFromCart, getCartCount, getTotalPrice } = useCart
             <img
               :src="product.image"
               :alt="product.name"
+              loading="lazy"
               class="w-full h-full object-cover hover:scale-105 transition-transform"
             />
             <!-- Stock badge -->
