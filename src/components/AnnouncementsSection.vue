@@ -3,8 +3,29 @@ import { Megaphone } from 'lucide-vue-next'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { useAnnouncementManager } from '@/composables/useAnnouncementManager'
+import { computed } from 'vue'
+import type { Announcement } from '@/data/announcements'
 
 const { announcements } = useAnnouncementManager()
+
+// 優化：按類型分組，減少DOM重排
+// 這樣可以更有效地利用瀏覽器的批量更新
+const groupedAnnouncements = computed(() => {
+  const groups: Record<'important' | 'new' | 'info', Announcement[]> = {
+    important: [],
+    new: [],
+    info: []
+  }
+  
+  announcements.value.forEach((ann: Announcement) => {
+    groups[ann.type as 'important' | 'new' | 'info'].push(ann)
+  })
+  
+  return groups
+})
+
+// 計算是否為空狀態
+const isEmpty = computed(() => announcements.value.length === 0)
 </script>
 
 <template>
@@ -23,24 +44,73 @@ const { announcements } = useAnnouncementManager()
       </div>
 
       <!-- Announcements list -->
-      <div v-if="announcements.length === 0" class="text-center py-12 text-gray-500">
+      <div v-if="isEmpty" class="text-center py-12 text-gray-500">
         目前沒有公告
       </div>
-      <div v-else class="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Card v-for="item in announcements" :key="item.id" class="bg-white/80">
-          <CardHeader>
-            <div class="flex items-center justify-between">
-              <CardTitle class="text-lg font-bold text-gray-900">{{ item.title }}</CardTitle>
-              <span class="text-sm text-gray-500">{{ item.date }}</span>
-            </div>
-            <div class="mt-2 flex flex-wrap gap-2">
-              <Badge v-for="tag in item.tags" :key="tag" variant="default">{{ tag }}</Badge>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <p class="text-gray-700 leading-relaxed">{{ item.content }}</p>
-          </CardContent>
-        </Card>
+      <!-- 優化渲染：按優先級分組顯示，重要公告優先 -->
+      <div v-else class="space-y-8">
+        <!-- 重要公告 -->
+        <div v-if="groupedAnnouncements.important.length > 0">
+          <h3 class="text-lg font-bold text-red-600 mb-4">🔴 重要公告</h3>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <Card v-for="item in groupedAnnouncements.important" :key="item.id" class="bg-red-50/50 border-red-200">
+              <CardHeader>
+                <div class="flex items-center justify-between">
+                  <CardTitle class="text-lg font-bold text-gray-900">{{ item.title }}</CardTitle>
+                  <span class="text-sm text-gray-500">{{ item.date }}</span>
+                </div>
+                <div class="mt-2 flex flex-wrap gap-2">
+                  <Badge v-for="tag in item.tags" :key="tag" variant="default">{{ tag }}</Badge>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <p class="text-gray-700 leading-relaxed">{{ item.content }}</p>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+
+        <!-- 新消息 -->
+        <div v-if="groupedAnnouncements.new.length > 0">
+          <h3 class="text-lg font-bold text-blue-600 mb-4">🟢 新消息</h3>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <Card v-for="item in groupedAnnouncements.new" :key="item.id" class="bg-blue-50/50 border-blue-200">
+              <CardHeader>
+                <div class="flex items-center justify-between">
+                  <CardTitle class="text-lg font-bold text-gray-900">{{ item.title }}</CardTitle>
+                  <span class="text-sm text-gray-500">{{ item.date }}</span>
+                </div>
+                <div class="mt-2 flex flex-wrap gap-2">
+                  <Badge v-for="tag in item.tags" :key="tag" variant="default">{{ tag }}</Badge>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <p class="text-gray-700 leading-relaxed">{{ item.content }}</p>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+
+        <!-- 一般資訊 -->
+        <div v-if="groupedAnnouncements.info.length > 0">
+          <h3 class="text-lg font-bold text-gray-600 mb-4">ℹ️ 一般資訊</h3>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <Card v-for="item in groupedAnnouncements.info" :key="item.id" class="bg-white/80">
+              <CardHeader>
+                <div class="flex items-center justify-between">
+                  <CardTitle class="text-lg font-bold text-gray-900">{{ item.title }}</CardTitle>
+                  <span class="text-sm text-gray-500">{{ item.date }}</span>
+                </div>
+                <div class="mt-2 flex flex-wrap gap-2">
+                  <Badge v-for="tag in item.tags" :key="tag" variant="default">{{ tag }}</Badge>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <p class="text-gray-700 leading-relaxed">{{ item.content }}</p>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
       </div>
     </div>
   </section>
