@@ -1,40 +1,11 @@
 <script setup lang="ts">
 import { ShoppingBag, Plus, Minus } from 'lucide-vue-next'
-import { ref } from 'vue'
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { products } from '@/data/products'
+import { useCart } from '@/composables/useCart'
 
-const cart = ref<Map<number, number>>(new Map())
-
-const addToCart = (productId: number) => {
-  const current = cart.value.get(productId) || 0
-  cart.value.set(productId, current + 1)
-}
-
-const removeFromCart = (productId: number) => {
-  const current = cart.value.get(productId) || 0
-  if (current > 1) {
-    cart.value.set(productId, current - 1)
-  } else {
-    cart.value.delete(productId)
-  }
-}
-
-const getCartCount = (productId: number) => {
-  return cart.value.get(productId) || 0
-}
-
-const getTotalPrice = () => {
-  let total = 0
-  cart.value.forEach((count, productId) => {
-    const product = products.find(p => p.id === productId)
-    if (product) {
-      total += product.price * count
-    }
-  })
-  return total
-}
+const { cart, addToCart, removeFromCart, getCartCount, getTotalPrice } = useCart()
 </script>
 
 <template>
@@ -127,12 +98,12 @@ const getTotalPrice = () => {
       </div>
 
       <!-- Cart summary -->
-      <div v-if="cart.size > 0" class="bg-emerald-50 border-2 border-emerald-200 rounded-xl p-6 max-w-md mx-auto">
+      <div v-if="Object.keys(cart).length > 0" class="bg-emerald-50 border-2 border-emerald-200 rounded-xl p-6 max-w-md mx-auto">
         <h3 class="font-bold text-lg text-gray-900 mb-4">購物車小計</h3>
         <div class="space-y-2 mb-4 max-h-40 overflow-y-auto">
-          <div v-for="[productId, count] in cart" :key="productId" class="flex justify-between text-sm text-gray-600">
-            <span>{{ products.find(p => p.id === productId)?.name }} x {{ count }}</span>
-            <span>$ {{ (products.find(p => p.id === productId)?.price || 0) * count }}</span>
+          <div v-for="[productIdStr, count] in Object.entries(cart)" :key="productIdStr" class="flex justify-between text-sm text-gray-600">
+            <span>{{ products.find(p => p.id === parseInt(productIdStr))?.name }} x {{ count }}</span>
+            <span>$ {{ (products.find(p => p.id === parseInt(productIdStr))?.price || 0) * count }}</span>
           </div>
         </div>
         <div class="border-t pt-4">
