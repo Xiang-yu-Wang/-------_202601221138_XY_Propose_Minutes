@@ -10,6 +10,12 @@ const router = createRouter({
       meta: { title: '首頁' }
     },
     {
+      path: '/announcements',
+      name: 'announcements',
+      component: () => import('@/views/AnnouncementsView.vue'),
+      meta: { title: '公告區' }
+    },
+    {
       path: '/services',
       name: 'services',
       component: () => import('@/views/ServicesView.vue'),

@@ -12,6 +12,7 @@ const navItems = [
   { name: '服務介紹', to: '/services' },
   { name: '方案說明', to: '/plans' },
   { name: '交貨實績', to: '/gallery' },
+  { name: '公告', to: '/announcements' },
   { name: '文件上傳', to: '/upload' },
   { name: '聯絡我們', to: '/contact' },
 ]
