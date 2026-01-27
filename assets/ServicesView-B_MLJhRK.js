@@ -1,1 +1,0 @@
-import{_ as e}from"./ServicesSection.vue_vue_type_script_setup_true_lang-myX7YHef.js";import{d as o,o as s,a as t,e as a}from"./index-AEtvvmIZ.js";const c={class:"pt-16"},p=o({__name:"ServicesView",setup(r){return(_,n)=>(s(),t("div",c,[a(e)]))}});export{p as default};
