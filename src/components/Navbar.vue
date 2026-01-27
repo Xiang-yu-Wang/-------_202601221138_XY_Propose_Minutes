@@ -3,22 +3,10 @@ import { useToggle, useEventListener } from '@vueuse/core'
 import { useRoute } from 'vue-router'
 import { Menu, X } from 'lucide-vue-next'
 import { Button } from '@/components/ui/button'
+import { navItems } from '@/data/navigation'
 
 const [isMenuOpen, toggleMenu] = useToggle(false)
 const route = useRoute()
-
-const navItems = [
-  { name: '首頁', to: '/' },
-  { name: '服務介紹', to: '/services' },
-  { name: '方案說明', to: '/plans' },
-  { name: '交貨實績', to: '/gallery' },
-  { name: '公告', to: '/announcements' },
-  { name: '商品', to: '/products' },
-  { name: '招募', to: '/recruitment' },
-  { name: '社群', to: '/community' },
-  { name: '文件上傳', to: '/upload' },
-  { name: '聯絡我們', to: '/contact' },
-]
 
 // Check if current route matches
 const isActive = (path: string) => {
