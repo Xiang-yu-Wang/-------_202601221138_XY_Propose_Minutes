@@ -8,18 +8,12 @@ export default defineConfig({
   plugins: [
     vue(),
     tailwindcss(),
-    // 輸出 gzip 版本以提升瀏覽器兼容性
+    // 輸出 gzip 版本以提升瀏覽器兼容性（Brotli 在 Windows 上易崩潰，故暫時移除）
     compression({
       algorithm: 'gzip',
       ext: '.gz',
       threshold: 1024,
-    }),
-    // 輸出 brotli 版本以取得更佳壓縮率
-    compression({
-      algorithm: 'brotliCompress',
-      ext: '.br',
-      threshold: 1024,
-      compressionOptions: { level: 11 },
+      deleteOriginFile: false,
     }),
   ],
   base: "./",
