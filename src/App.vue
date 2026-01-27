@@ -4,10 +4,14 @@ import Navbar from './components/Navbar.vue'
 import FooterSection from './components/FooterSection.vue'
 import ScrollToTop from './components/ScrollToTop.vue'
 import { useSEO } from '@/composables/useSEO'
+import { useJsonLd } from '@/composables/useJsonLd'
 import { reportWebVitals } from '@/composables/useResourcePreload'
 
 // 啟用 SEO 管理
 useSEO()
+
+// 啟用 JSON-LD 結構化資料（Google Rich Results）
+useJsonLd()
 
 // 啟用 Web Vitals 監控（開發環境）
 onMounted(() => {
