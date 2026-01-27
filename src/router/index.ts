@@ -22,6 +22,12 @@ const router = createRouter({
       meta: { title: '商品區' }
     },
     {
+      path: '/recruitment',
+      name: 'recruitment',
+      component: () => import('@/views/RecruitmentView.vue'),
+      meta: { title: '招募業務' }
+    },
+    {
       path: '/services',
       name: 'services',
       component: () => import('@/views/ServicesView.vue'),

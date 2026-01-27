@@ -14,6 +14,7 @@ const navItems = [
   { name: '交貨實績', to: '/gallery' },
   { name: '公告', to: '/announcements' },
   { name: '商品', to: '/products' },
+  { name: '招募', to: '/recruitment' },
   { name: '文件上傳', to: '/upload' },
   { name: '聯絡我們', to: '/contact' },
 ]
