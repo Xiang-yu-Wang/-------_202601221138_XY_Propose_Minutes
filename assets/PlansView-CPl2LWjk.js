@@ -1,1 +1,0 @@
-import{_ as e}from"./PlansSection.vue_vue_type_script_setup_true_lang-BDk29coN.js";import{d as o,a as t,e as a,o as s}from"./index-BqlCjI0N.js";import"./CardTitle.vue_vue_type_script_setup_true_lang-CFKhE6TT.js";const n={class:"pt-16"},d=o({__name:"PlansView",setup(r){return(_,c)=>(s(),t("div",n,[a(e)]))}});export{d as default};
