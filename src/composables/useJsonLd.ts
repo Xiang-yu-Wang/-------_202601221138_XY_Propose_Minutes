@@ -1,4 +1,5 @@
-import { computed, watchEffect } from 'vue'
+import { computed } from 'vue'
+import { useHead } from '@vueuse/head'
 import { useRoute } from 'vue-router'
 import { faqItems } from '@/data/faq'
 
@@ -293,24 +294,6 @@ function getPageSchemas(path: string) {
 }
 
 /**
- * 將 JSON-LD 注入到頁面 head 中
- */
-function injectJsonLd(schemas: object[]) {
-  // 移除舊的 JSON-LD 標籤
-  const existingScripts = document.querySelectorAll('script[type="application/ld+json"][data-json-ld]')
-  existingScripts.forEach((script) => script.remove())
-
-  // 注入新的 JSON-LD 標籤
-  schemas.forEach((schema, index) => {
-    const script = document.createElement('script')
-    script.type = 'application/ld+json'
-    script.setAttribute('data-json-ld', `schema-${index}`)
-    script.textContent = JSON.stringify(schema)
-    document.head.appendChild(script)
-  })
-}
-
-/**
  * useJsonLd Composable
  * 自動管理頁面的 JSON-LD 結構化資料
  */
@@ -320,9 +303,13 @@ export function useJsonLd() {
   // 計算當前頁面的 schemas
   const schemas = computed(() => getPageSchemas(route.path))
 
-  // 監聽路由變化，自動更新 JSON-LD
-  watchEffect(() => {
-    injectJsonLd(schemas.value)
+  // 交由 useHead 管理 script 標籤，避免手動操作 DOM 並確保與 SSR 兼容
+  useHead({
+    script: () => schemas.value.map((schema, index) => ({
+      type: 'application/ld+json',
+      'data-json-ld': `schema-${index}`,
+      children: JSON.stringify(schema),
+    })),
   })
 
   return {

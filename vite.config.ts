@@ -8,13 +8,15 @@ export default defineConfig({
   plugins: [
     vue(),
     tailwindcss(),
-    // 輸出 gzip 版本以提升瀏覽器兼容性（Brotli 在 Windows 上易崩潰，故暫時移除）
-    compression({
-      algorithm: 'gzip',
-      ext: '.gz',
-      threshold: 1024,
-      deleteOriginFile: false,
-    }),
+    // 可透過 SKIP_COMPRESSION=true 跳過壓縮，避免 Windows/防毒鎖檔造成無訊息的 exit code 1
+    ...(process.env.SKIP_COMPRESSION === 'true'
+      ? []
+      : [compression({
+          algorithm: 'gzip',
+          ext: '.gz',
+          threshold: 1024,
+          deleteOriginFile: false,
+        })]),
   ],
   base: "./",
   resolve: {
