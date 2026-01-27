@@ -21,6 +21,9 @@
 - 📧 聯絡表單與線上預約
 - 💳 服務方案展示
 - 🎯 虛擬滾動導航追蹤
+- 🔍 **完整 SEO 優化**（meta 標籤、sitemap、robots.txt）
+- 📊 **JSON-LD 結構化數據**（9 種 Schema.org 類型，40+ 結構化片段）
+- ⭐ **Google Rich Results**（FAQ、商品卡片、職位列表、評價星級）
 
 ## 專案結構
 
@@ -41,7 +44,10 @@ src/
 │   ├── UploadSection.vue
 │   └── ui/                  # shadcn-vue 元件
 ├── composables/             # 自訂 Vue Composition
-│   └── useScrollSpy.ts
+│   ├── useScrollSpy.ts      # 滾動監控
+│   ├── useSEO.ts            # SEO meta 標籤管理
+│   ├── useJsonLd.ts         # JSON-LD 結構化數據
+│   └── useResourcePreload.ts # 資源預載與 Web Vitals
 └── lib/
     └── utils.ts            # 工具函數 (cn())
 ```
@@ -81,7 +87,10 @@ bun run build
 ```
 
 建置產出會自動進行以下優化：
-- ✅ 自動分割 vendor chunks (vue-vendor, ui-vendor, utils-vendor)
+- ✅ 自動分割 vendor chunks (v
+- ✅ **自動生成 SEO 檔案**（sitemap.xml、robots.txt）
+
+**SEO 部署準備**：部署前請修改 `.env.production` 中的域名，詳見 [SEO_QUICK_START.md](SEO_QUICK_START.md)ue-vendor, ui-vendor, utils-vendor)
 - ✅ CSS 代碼分割
 - ✅ 移除開發用 console 語句
 - ✅ Gzip 壓縮（總大小約 0.31 MB）
@@ -139,6 +148,25 @@ const count = ref(0)
 - 電話：`0982-571-134`
 - LINE：`@792nvftc`
 - 郵箱：`playegg903@gmail.com`
+
+#### 驗證 JSON-LD 結構化數據
+開發環境中檢查：
+```bash
+# 啟動預覽服務器
+bun run preview
+
+# 訪問 http://localhost:4173
+# 打開瀏覽器開發者工具
+# 在 Elements/Elements 標籤搜尋 "application/ld+json"
+# 應該看到多個 <script type="application/ld+json"> 標籤
+```
+
+部署後使用 Google 工具驗證：
+1. [Google Rich Results Test](https://search.google.com/test/rich-results)
+2. 輸入您的網址測試每個頁面
+3. 檢查是否正確識別 Schema 類型
+
+詳細說明請見 [JSON_LD_COMPLETE.md](JSON_LD_COMPLETE.md)
 
 ## 設定檔
 

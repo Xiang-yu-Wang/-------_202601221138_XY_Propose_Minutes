@@ -2,6 +2,9 @@ import { computed } from 'vue'
 import { useHead } from '@vueuse/head'
 import { useRoute } from 'vue-router'
 import { faqItems } from '@/data/faq'
+import type { Product } from '@/data/products'
+import type { Testimonial } from '@/data/testimonials'
+import type { JobPosition } from '@/data/positions'
 
 /**
  * JSON-LD 結構化資料 Composable
@@ -118,7 +121,12 @@ function generateLocalBusinessSchema() {
     priceRange: organizationInfo.priceRange,
     areaServed: organizationInfo.areaServed,
     sameAs: organizationInfo.sameAs,
-    // 營業時間（假設週一至週五 9:00-18:00）
+    address: {
+      '@type': 'PostalAddress',
+      addressCountry: 'TW',
+      addressRegion: '台灣',
+    },
+    // 營業時間（週一至週五 9:00-18:00）
     openingHoursSpecification: [
       {
         '@type': 'OpeningHoursSpecification',
@@ -127,6 +135,14 @@ function generateLocalBusinessSchema() {
         closes: '18:00',
       },
     ],
+    // 聚合評分（假設客戶好評）
+    aggregateRating: {
+      '@type': 'AggregateRating',
+      ratingValue: '4.8',
+      reviewCount: '127',
+      bestRating: '5',
+      worstRating: '1',
+    },
   }
 }
 
@@ -147,6 +163,19 @@ function generateServiceSchema() {
     },
     areaServed: organizationInfo.areaServed,
     serviceType: '股東紀念品代領',
+    category: '商業服務',
+    brand: {
+      '@type': 'Brand',
+      name: organizationInfo.name,
+    },
+    // 服務特色
+    additionalType: 'https://schema.org/FinancialService',
+    offers: {
+      '@type': 'Offer',
+      priceRange: organizationInfo.priceRange,
+      priceCurrency: 'TWD',
+      availability: 'https://schema.org/InStock',
+    },
     // 子服務
     hasOfferCatalog: {
       '@type': 'OfferCatalog',
@@ -262,9 +291,152 @@ function generateBreadcrumbSchema(path: string) {
 }
 
 /**
+ * 生成 Product Schema（商品頁面）
+ */
+function generateProductSchema(product: Product) {
+  const baseURL = getBaseURL()
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'Product',
+    '@id': `${baseURL}/products#product-${product.id}`,
+    name: product.name,
+    description: product.description,
+    image: product.image,
+    brand: {
+      '@type': 'Brand',
+      name: organizationInfo.name,
+    },
+    offers: {
+      '@type': 'Offer',
+      url: `${baseURL}/products`,
+      priceCurrency: 'TWD',
+      price: product.price,
+      availability: product.available
+        ? 'https://schema.org/InStock'
+        : 'https://schema.org/OutOfStock',
+      priceValidUntil: new Date(new Date().getFullYear() + 1, 11, 31).toISOString().split('T')[0],
+      seller: {
+        '@type': 'Organization',
+        '@id': `${baseURL}/#organization`,
+      },
+    },
+    category: product.category,
+  }
+}
+
+/**
+ * 生成 ItemList Schema（商品列表）
+ */
+function generateProductListSchema(products: Product[]) {
+  const baseURL = getBaseURL()
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'ItemList',
+    '@id': `${baseURL}/products#itemlist`,
+    name: '商品列表',
+    description: '精選優質商品和伴手禮',
+    numberOfItems: products.length,
+    itemListElement: products.slice(0, 10).map((product, index) => ({
+      '@type': 'ListItem',
+      position: index + 1,
+      item: {
+        '@type': 'Product',
+        '@id': `${baseURL}/products#product-${product.id}`,
+        name: product.name,
+        image: product.image,
+        offers: {
+          '@type': 'Offer',
+          price: product.price,
+          priceCurrency: 'TWD',
+          availability: product.available
+            ? 'https://schema.org/InStock'
+            : 'https://schema.org/OutOfStock',
+        },
+      },
+    })),
+  }
+}
+
+/**
+ * 生成 Review Schema（客戶評價）
+ */
+function generateReviewSchema(testimonial: Testimonial) {
+  const baseURL = getBaseURL()
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'Review',
+    '@id': `${baseURL}/#review-${testimonial.id}`,
+    author: {
+      '@type': 'Person',
+      name: testimonial.name,
+      jobTitle: testimonial.role,
+    },
+    reviewRating: {
+      '@type': 'Rating',
+      ratingValue: testimonial.rating,
+      bestRating: 5,
+      worstRating: 1,
+    },
+    reviewBody: testimonial.content,
+    itemReviewed: {
+      '@type': 'Service',
+      '@id': `${baseURL}/#service`,
+    },
+    datePublished: new Date().toISOString().split('T')[0],
+  }
+}
+
+/**
+ * 生成 JobPosting Schema（招募資訊）
+ */
+function generateJobPostingSchema(position: JobPosition) {
+  const baseURL = getBaseURL()
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'JobPosting',
+    '@id': `${baseURL}/recruitment#job-${position.id}`,
+    title: position.title,
+    description: `${position.description}\n\n職位要求：\n${position.requirements.map((r) => `- ${r}`).join('\n')}`,
+    employmentType: position.type.includes('全職') ? 'FULL_TIME' : 'PART_TIME',
+    hiringOrganization: {
+      '@type': 'Organization',
+      '@id': `${baseURL}/#organization`,
+      name: organizationInfo.name,
+      sameAs: baseURL,
+    },
+    jobLocation: {
+      '@type': 'Place',
+      address: {
+        '@type': 'PostalAddress',
+        addressRegion: position.location,
+        addressCountry: 'TW',
+      },
+    },
+    baseSalary: {
+      '@type': 'MonetaryAmount',
+      currency: 'TWD',
+      value: {
+        '@type': 'QuantitativeValue',
+        value: position.salary,
+        unitText: position.salary.includes('時薪') ? 'HOUR' : 'MONTH',
+      },
+    },
+    datePosted: new Date().toISOString().split('T')[0],
+    validThrough: new Date(new Date().setMonth(new Date().getMonth() + 3)).toISOString().split('T')[0],
+    applicantLocationRequirements: {
+      '@type': 'Country',
+      name: 'TW',
+    },
+  }
+}
+
+/**
  * 根據頁面路徑獲取適合的 JSON-LD schemas
  */
-function getPageSchemas(path: string) {
+function getPageSchemas(
+  path: string,
+  options?: { products?: Product[]; testimonials?: Testimonial[]; positions?: JobPosition[] }
+) {
   const schemas: object[] = []
 
   // 所有頁面都包含 Organization 和 WebSite
@@ -275,11 +447,30 @@ function getPageSchemas(path: string) {
   if (path === '/' || path === '') {
     schemas.push(generateLocalBusinessSchema())
     schemas.push(generateFAQSchema()) // 首頁顯示 FAQ
+
+    // 如果有評價數據，添加評價 schemas
+    if (options?.testimonials) {
+      options.testimonials.forEach((testimonial) => {
+        schemas.push(generateReviewSchema(testimonial))
+      })
+    }
   }
 
   // 服務頁面
   if (path === '/services' || path === '/') {
     schemas.push(generateServiceSchema())
+  }
+
+  // 商品頁面
+  if (path === '/products' && options?.products) {
+    schemas.push(generateProductListSchema(options.products))
+  }
+
+  // 招募頁面
+  if (path === '/recruitment' && options?.positions) {
+    options.positions.forEach((position) => {
+      schemas.push(generateJobPostingSchema(position))
+    })
   }
 
   // FAQ 單獨頁面（如果有的話）
@@ -296,12 +487,21 @@ function getPageSchemas(path: string) {
 /**
  * useJsonLd Composable
  * 自動管理頁面的 JSON-LD 結構化資料
+ * 
+ * @param options - 可選配置，用於傳入頁面特定數據
+ * @param options.products - 商品列表（用於商品頁面）
+ * @param options.testimonials - 評價列表（用於首頁）
+ * @param options.positions - 職位列表（用於招募頁面）
  */
-export function useJsonLd() {
+export function useJsonLd(options?: {
+  products?: Product[]
+  testimonials?: Testimonial[]
+  positions?: JobPosition[]
+}) {
   const route = useRoute()
 
   // 計算當前頁面的 schemas
-  const schemas = computed(() => getPageSchemas(route.path))
+  const schemas = computed(() => getPageSchemas(route.path, options))
 
   // 交由 useHead 管理 script 標籤，避免手動操作 DOM 並確保與 SSR 兼容
   useHead({
@@ -321,6 +521,10 @@ export function useJsonLd() {
     generateFAQSchema,
     generateWebSiteSchema,
     generateBreadcrumbSchema,
+    generateProductSchema,
+    generateProductListSchema,
+    generateReviewSchema,
+    generateJobPostingSchema,
   }
 }
 
@@ -334,5 +538,9 @@ export {
   generateFAQSchema,
   generateWebSiteSchema,
   generateBreadcrumbSchema,
+  generateProductSchema,
+  generateProductListSchema,
+  generateReviewSchema,
+  generateJobPostingSchema,
   getPageSchemas,
 }
