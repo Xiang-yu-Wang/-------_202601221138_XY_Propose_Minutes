@@ -16,6 +16,12 @@ const router = createRouter({
       meta: { title: '公告區' }
     },
     {
+      path: '/products',
+      name: 'products',
+      component: () => import('@/views/ProductsView.vue'),
+      meta: { title: '商品區' }
+    },
+    {
       path: '/services',
       name: 'services',
       component: () => import('@/views/ServicesView.vue'),
