@@ -1,0 +1,56 @@
+# Netlify 配置檔案
+
+[build]
+  # 建置指令
+  command = "bun run build"
+  
+  # 輸出目錄
+  publish = "dist"
+  
+  # 環境變數
+  environment = { NODE_VERSION = "20" }
+
+# SPA 路由重定向
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+# 安全標頭
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    X-Content-Type-Options = "nosniff"
+    X-XSS-Protection = "1; mode=block"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+
+# 靜態資源快取
+[[headers]]
+  for = "/assets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+# HTML 不快取
+[[headers]]
+  for = "/*.html"
+  [headers.values]
+    Cache-Control = "no-store, no-cache, must-revalidate"
+
+# Gzip 壓縮（Netlify 自動啟用）
+# Brotli 壓縮（Netlify 自動啟用）
+# 無需額外配置，Netlify 預設啟用壓縮
+
+# 插件（可選）
+[[plugins]]
+  package = "@netlify/plugin-lighthouse"
+  
+  # Lighthouse 性能檢查
+  [plugins.inputs]
+    output_path = "lighthouse-reports"
+    
+  [plugins.inputs.thresholds]
+    performance = 0.9
+    accessibility = 0.9
+    best-practices = 0.9
+    seo = 0.9
