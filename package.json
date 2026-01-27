@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "vite",
     "prebuild": "bun scripts/generate-seo-files.js",
-    "build": "vue-tsc -b && vite build",
+    "build": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/stable-build.ps1",
     "preview": "vite preview",
     "analyze": "ANALYZE=true bun run build"
   },
