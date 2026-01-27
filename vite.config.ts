@@ -2,9 +2,26 @@ import path from 'node:path'
 import { defineConfig } from 'vite'
 import tailwindcss from '@tailwindcss/vite'
 import vue from '@vitejs/plugin-vue'
+import compression from 'vite-plugin-compression'
 
 export default defineConfig({
-  plugins: [vue(), tailwindcss()],
+  plugins: [
+    vue(),
+    tailwindcss(),
+    // 輸出 gzip 版本以提升瀏覽器兼容性
+    compression({
+      algorithm: 'gzip',
+      ext: '.gz',
+      threshold: 1024,
+    }),
+    // 輸出 brotli 版本以取得更佳壓縮率
+    compression({
+      algorithm: 'brotliCompress',
+      ext: '.br',
+      threshold: 1024,
+      compressionOptions: { level: 11 },
+    }),
+  ],
   base: "./",
   resolve: {
     alias: {
@@ -14,6 +31,10 @@ export default defineConfig({
   build: {
     // 清理輸出目錄
     emptyOutDir: true,
+    // 避免內建壓縮體積計算在 Windows 發生崩潰
+    reportCompressedSize: false,
+    // 避免 esbuild 在部分 Windows 環境的原生崩潰，改用 terser 壓縮
+    minify: 'terser',
     // 優化建置配置
     rollupOptions: {
       output: {
