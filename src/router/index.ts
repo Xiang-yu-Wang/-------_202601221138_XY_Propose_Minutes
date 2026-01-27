@@ -28,6 +28,12 @@ const router = createRouter({
       meta: { title: '招募業務' }
     },
     {
+      path: '/community',
+      name: 'community',
+      component: () => import('@/views/CommunityView.vue'),
+      meta: { title: '加入社群' }
+    },
+    {
       path: '/services',
       name: 'services',
       component: () => import('@/views/ServicesView.vue'),
