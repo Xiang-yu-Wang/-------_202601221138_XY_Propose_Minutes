@@ -34,6 +34,7 @@ import { qrCodeUrl, communityLinks } from '@/data/community'
                 <img 
                   :src="qrCodeUrl" 
                   alt="LINE QR Code - 大倉代領股東紀念品"
+                  loading="lazy"
                   class="w-56 h-56 object-contain"
                 />
               </div>

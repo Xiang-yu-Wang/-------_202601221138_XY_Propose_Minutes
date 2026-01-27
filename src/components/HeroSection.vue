@@ -14,7 +14,7 @@ const heroImageUrl = 'https://images.unsplash.com/photo-1553729459-efe14ef6055d?
     <img 
       :src="heroImageUrl"
       alt="背景圖"
-      loading="lazy"
+      loading="eager"
       @load="imageLoaded = true"
       :class="[
         'absolute inset-0 w-full h-full object-cover opacity-10 transition-opacity duration-500',
