@@ -1,4 +1,6 @@
 import { createRouter, createWebHashHistory } from 'vue-router'
+import { defineAsyncComponent } from 'vue'
+import LoadingSpinner from '@/components/LoadingSpinner.vue'
 
 const router = createRouter({
   history: createWebHashHistory(import.meta.env.BASE_URL),
@@ -6,61 +8,161 @@ const router = createRouter({
     {
       path: '/',
       name: 'home',
-      component: () => import('@/views/HomeView.vue'),
+      component: defineAsyncComponent({
+        loader: () => import('@/views/HomeView.vue'),
+        loadingComponent: LoadingSpinner,
+        delay: 150,
+        timeout: 15000,
+        onError(error, retry, fail, attempts) {
+          void error
+          if (attempts <= 2) retry()
+          else fail()
+        }
+      }),
       meta: { title: '首頁' }
     },
     {
       path: '/announcements',
       name: 'announcements',
-      component: () => import('@/views/AnnouncementsView.vue'),
+      component: defineAsyncComponent({
+        loader: () => import('@/views/AnnouncementsView.vue'),
+        loadingComponent: LoadingSpinner,
+        delay: 150,
+        timeout: 15000,
+        onError(error, retry, fail, attempts) {
+          void error
+          if (attempts <= 2) retry()
+          else fail()
+        }
+      }),
       meta: { title: '公告區' }
     },
     {
       path: '/products',
       name: 'products',
-      component: () => import('@/views/ProductsView.vue'),
+      component: defineAsyncComponent({
+        loader: () => import('@/views/ProductsView.vue'),
+        loadingComponent: LoadingSpinner,
+        delay: 150,
+        timeout: 15000,
+        onError(error, retry, fail, attempts) {
+          void error
+          if (attempts <= 2) retry()
+          else fail()
+        }
+      }),
       meta: { title: '商品區' }
     },
     {
       path: '/recruitment',
       name: 'recruitment',
-      component: () => import('@/views/RecruitmentView.vue'),
+      component: defineAsyncComponent({
+        loader: () => import('@/views/RecruitmentView.vue'),
+        loadingComponent: LoadingSpinner,
+        delay: 150,
+        timeout: 15000,
+        onError(error, retry, fail, attempts) {
+          void error
+          if (attempts <= 2) retry()
+          else fail()
+        }
+      }),
       meta: { title: '招募業務' }
     },
     {
       path: '/community',
       name: 'community',
-      component: () => import('@/views/CommunityView.vue'),
+      component: defineAsyncComponent({
+        loader: () => import('@/views/CommunityView.vue'),
+        loadingComponent: LoadingSpinner,
+        delay: 150,
+        timeout: 15000,
+        onError(error, retry, fail, attempts) {
+          void error
+          if (attempts <= 2) retry()
+          else fail()
+        }
+      }),
       meta: { title: '加入社群' }
     },
     {
       path: '/services',
       name: 'services',
-      component: () => import('@/views/ServicesView.vue'),
+      component: defineAsyncComponent({
+        loader: () => import('@/views/ServicesView.vue'),
+        loadingComponent: LoadingSpinner,
+        delay: 150,
+        timeout: 15000,
+        onError(error, retry, fail, attempts) {
+          void error
+          if (attempts <= 2) retry()
+          else fail()
+        }
+      }),
       meta: { title: '服務介紹' }
     },
     {
       path: '/plans',
       name: 'plans',
-      component: () => import('@/views/PlansView.vue'),
+      component: defineAsyncComponent({
+        loader: () => import('@/views/PlansView.vue'),
+        loadingComponent: LoadingSpinner,
+        delay: 150,
+        timeout: 15000,
+        onError(error, retry, fail, attempts) {
+          void error
+          if (attempts <= 2) retry()
+          else fail()
+        }
+      }),
       meta: { title: '方案說明' }
     },
     {
       path: '/gallery',
       name: 'gallery',
-      component: () => import('@/views/GalleryView.vue'),
+      component: defineAsyncComponent({
+        loader: () => import('@/views/GalleryView.vue'),
+        loadingComponent: LoadingSpinner,
+        delay: 150,
+        timeout: 15000,
+        onError(error, retry, fail, attempts) {
+          void error
+          if (attempts <= 2) retry()
+          else fail()
+        }
+      }),
       meta: { title: '交貨實績' }
     },
     {
       path: '/upload',
       name: 'upload',
-      component: () => import('@/views/UploadView.vue'),
+      component: defineAsyncComponent({
+        loader: () => import('@/views/UploadView.vue'),
+        loadingComponent: LoadingSpinner,
+        delay: 150,
+        timeout: 15000,
+        onError(error, retry, fail, attempts) {
+          void error
+          if (attempts <= 2) retry()
+          else fail()
+        }
+      }),
       meta: { title: '文件上傳' }
     },
     {
       path: '/contact',
       name: 'contact',
-      component: () => import('@/views/ContactView.vue'),
+      component: defineAsyncComponent({
+        loader: () => import('@/views/ContactView.vue'),
+        loadingComponent: LoadingSpinner,
+        delay: 150,
+        timeout: 15000,
+        onError(error, retry, fail, attempts) {
+          void error
+          if (attempts <= 2) retry()
+          else fail()
+        }
+      }),
       meta: { title: '聯絡我們' }
     },
   ],
