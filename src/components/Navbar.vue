@@ -11,6 +11,7 @@ const navItems = [
   { name: '服務介紹', href: '#services', id: 'services' },
   { name: '方案說明', href: '#plans', id: 'plans' },
   { name: '交貨實績', href: '#gallery', id: 'gallery' },
+  { name: '文件上傳', href: '#upload', id: 'upload' },
   { name: '聯絡我們', href: '#contact', id: 'contact' },
 ]
 

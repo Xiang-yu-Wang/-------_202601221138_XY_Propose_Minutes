@@ -1,43 +1,6 @@
 <script setup lang="ts">
-import { ref } from 'vue'
-import { MapPin, Phone, Mail, Send, Loader2 } from 'lucide-vue-next'
+import { MapPin, Phone, Mail, Send } from 'lucide-vue-next'
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Textarea } from '@/components/ui/textarea'
-
-const formData = ref({
-  name: '',
-  phone: '',
-  message: '',
-})
-
-const isSubmitting = ref(false)
-const submitStatus = ref<'idle' | 'success' | 'error'>('idle')
-
-const handleSubmit = async () => {
-  if (!formData.value.name || !formData.value.phone) {
-    alert('請填寫姓名和電話')
-    return
-  }
-  
-  isSubmitting.value = true
-  
-  // Simulate form submission
-  await new Promise(resolve => setTimeout(resolve, 1000))
-  
-  // Here you would normally send the data to your backend
-  console.log('Form submitted:', formData.value)
-  
-  isSubmitting.value = false
-  submitStatus.value = 'success'
-  
-  // Reset form
-  formData.value = { name: '', phone: '', message: '' }
-  
-  setTimeout(() => {
-    submitStatus.value = 'idle'
-  }, 3000)
-}
 </script>
 
 <template>
@@ -122,63 +85,45 @@ const handleSubmit = async () => {
         <div class="bg-white rounded-2xl p-8 shadow-xl">
           <h3 class="text-2xl font-bold text-gray-900 mb-6">傳送訊息給我們</h3>
           
-          <form @submit.prevent="handleSubmit" class="space-y-6">
-            <div>
-              <label for="name" class="block text-sm font-medium text-gray-700 mb-2">
-                姓名 <span class="text-red-500">*</span>
-              </label>
-              <Input
-                id="name"
-                v-model="formData.name"
-                type="text"
-                required
-                placeholder="請輸入您的姓名"
-              />
-            </div>
+          <div class="space-y-6">
+            <p class="text-gray-600">
+              請填寫 Google 表單與我們聯繫，我們會盡快回覆您。
+            </p>
 
-            <div>
-              <label for="phone" class="block text-sm font-medium text-gray-700 mb-2">
-                電話 <span class="text-red-500">*</span>
-              </label>
-              <Input
-                id="phone"
-                v-model="formData.phone"
-                type="tel"
-                required
-                placeholder="請輸入您的電話"
-              />
-            </div>
-
-            <div>
-              <label for="message" class="block text-sm font-medium text-gray-700 mb-2">
-                訊息
-              </label>
-              <Textarea
-                id="message"
-                v-model="formData.message"
-                rows="4"
-                placeholder="請輸入您的訊息..."
-              />
+            <div class="bg-gradient-to-r from-emerald-50 to-teal-50 rounded-xl p-6 space-y-3">
+              <div class="flex items-center gap-2 text-gray-700">
+                <span class="w-2 h-2 bg-emerald-600 rounded-full"></span>
+                <span>填寫您的基本資訊</span>
+              </div>
+              <div class="flex items-center gap-2 text-gray-700">
+                <span class="w-2 h-2 bg-emerald-600 rounded-full"></span>
+                <span>告訴我們您的需求</span>
+              </div>
+              <div class="flex items-center gap-2 text-gray-700">
+                <span class="w-2 h-2 bg-emerald-600 rounded-full"></span>
+                <span>我們會盡快與您聯繫</span>
+              </div>
             </div>
 
             <Button
-              type="submit"
-              :disabled="isSubmitting"
+              as-child
               class="w-full py-6 text-lg"
               size="lg"
             >
-              <Loader2 v-if="isSubmitting" class="w-5 h-5 animate-spin mr-2" />
-              <Send v-else class="w-5 h-5 mr-2" />
-              {{ isSubmitting ? '傳送中...' : '提交' }}
+              <a 
+                href="https://forms.gle/WZii479HvP3ptzqs7" 
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <Send class="w-5 h-5 mr-2" />
+                前往填寫表單
+              </a>
             </Button>
 
-            <div 
-              v-if="submitStatus === 'success'"
-              class="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-xl text-center"
-            >
-              訊息已成功送出！我們會盡快與您聯繫。
-            </div>
-          </form>
+            <p class="text-sm text-gray-500 text-center">
+              點擊後將開啟 Google 表單新視窗
+            </p>
+          </div>
         </div>
       </div>
     </div>
