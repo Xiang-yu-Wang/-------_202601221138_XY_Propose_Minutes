@@ -2,7 +2,9 @@
 import { Megaphone } from 'lucide-vue-next'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { announcements } from '@/data/announcements'
+import { useAnnouncementManager } from '@/composables/useAnnouncementManager'
+
+const { announcements } = useAnnouncementManager()
 </script>
 
 <template>
@@ -21,8 +23,11 @@ import { announcements } from '@/data/announcements'
       </div>
 
       <!-- Announcements list -->
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Card v-for="(item, idx) in announcements" :key="idx" class="bg-white/80">
+      <div v-if="announcements.length === 0" class="text-center py-12 text-gray-500">
+        目前沒有公告
+      </div>
+      <div v-else class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <Card v-for="item in announcements" :key="item.id" class="bg-white/80">
           <CardHeader>
             <div class="flex items-center justify-between">
               <CardTitle class="text-lg font-bold text-gray-900">{{ item.title }}</CardTitle>

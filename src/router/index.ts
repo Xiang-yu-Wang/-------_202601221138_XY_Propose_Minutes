@@ -80,6 +80,12 @@ const router = createRouter({
       component: createAsyncComponent(() => import('@/views/ContactView.vue')),
       meta: { title: '聯絡我們' }
     },
+    {
+      path: '/admin',
+      name: 'admin',
+      component: createAsyncComponent(() => import('@/views/AdminView.vue')),
+      meta: { title: '管理後台' }
+    },
   ],
   scrollBehavior(to, _from, savedPosition) {
     if (savedPosition) {

@@ -1,11 +1,14 @@
 <script setup lang="ts">
 import { Megaphone, ArrowRight } from 'lucide-vue-next'
 import { RouterLink } from 'vue-router'
-import { announcements } from '@/data/announcements'
+import { useAnnouncementManager } from '@/composables/useAnnouncementManager'
 import { Badge } from '@/components/ui/badge'
+import { computed } from 'vue'
+
+const { announcements } = useAnnouncementManager()
 
 // 只顯示最新 2 則公告
-const latestAnnouncements = announcements.slice(0, 2)
+const latestAnnouncements = computed(() => announcements.value.slice(0, 2))
 </script>
 
 <template>
