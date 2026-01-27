@@ -1,0 +1,56 @@
+<script setup lang="ts">
+import { Megaphone, ArrowRight } from 'lucide-vue-next'
+import { RouterLink } from 'vue-router'
+import { announcements } from '@/data/announcements'
+import { Badge } from '@/components/ui/badge'
+
+// 只顯示最新 2 則公告
+const latestAnnouncements = announcements.slice(0, 2)
+</script>
+
+<template>
+  <section class="py-12 bg-gradient-to-r from-amber-50 to-orange-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex flex-col md:flex-row items-start md:items-center gap-4">
+        <!-- Icon and title -->
+        <div class="flex items-center gap-3 shrink-0">
+          <div class="w-10 h-10 bg-amber-500 rounded-full flex items-center justify-center">
+            <Megaphone class="w-5 h-5 text-white" />
+          </div>
+          <span class="font-bold text-gray-900">最新公告</span>
+        </div>
+
+        <!-- Announcements marquee -->
+        <div class="flex-1 overflow-hidden">
+          <div class="flex flex-col md:flex-row gap-4 md:gap-8">
+            <div 
+              v-for="announcement in latestAnnouncements" 
+              :key="announcement.id"
+              class="flex items-center gap-2"
+            >
+              <Badge 
+                :class="[
+                  announcement.type === 'important' ? 'bg-red-100 text-red-700' :
+                  announcement.type === 'new' ? 'bg-emerald-100 text-emerald-700' :
+                  'bg-blue-100 text-blue-700'
+                ]"
+              >
+                {{ announcement.type === 'important' ? '重要' : announcement.type === 'new' ? '新' : '資訊' }}
+              </Badge>
+              <span class="text-gray-700 text-sm md:text-base">{{ announcement.title }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- View all link -->
+        <RouterLink 
+          to="/announcements" 
+          class="shrink-0 inline-flex items-center gap-1 text-amber-600 hover:text-amber-700 font-medium text-sm"
+        >
+          查看全部
+          <ArrowRight class="w-4 h-4" />
+        </RouterLink>
+      </div>
+    </div>
+  </section>
+</template>
