@@ -2,21 +2,21 @@ import path from 'node:path'
 import { defineConfig } from 'vite'
 import tailwindcss from '@tailwindcss/vite'
 import vue from '@vitejs/plugin-vue'
-import compression from 'vite-plugin-compression'
 
 export default defineConfig({
   plugins: [
     vue(),
     tailwindcss(),
-    // 可透過 SKIP_COMPRESSION=true 跳過壓縮，避免 Windows/防毒鎖檔造成無訊息的 exit code 1
-    ...(process.env.SKIP_COMPRESSION === 'true'
-      ? []
-      : [compression({
-          algorithm: 'gzip',
-          ext: '.gz',
-          threshold: 1024,
-          deleteOriginFile: false,
-        })]),
+    // Windows 環境下 gzip 壓縮工具易超時/崩潰，改為禁用
+    // 部署時可在 Nginx/CDN 層級啟用壓縮（更穩定且高效）
+    // ...(process.env.SKIP_COMPRESSION === 'true'
+    //   ? []
+    //   : [compression({
+    //       algorithm: 'gzip',
+    //       ext: '.gz',
+    //       threshold: 1024,
+    //       deleteOriginFile: false,
+    //     })]),
   ],
   base: "./",
   resolve: {
@@ -29,8 +29,8 @@ export default defineConfig({
     emptyOutDir: true,
     // 避免內建壓縮體積計算在 Windows 發生崩潰
     reportCompressedSize: false,
-    // 避免 esbuild 在部分 Windows 環境的原生崩潰，改用 terser 壓縮
-    minify: 'terser',
+    // 使用 esbuild（Windows 更穩定，Terser 在複雜 chunks 易崩潰）
+    minify: 'esbuild',
     // 優化建置配置
     rollupOptions: {
       output: {
