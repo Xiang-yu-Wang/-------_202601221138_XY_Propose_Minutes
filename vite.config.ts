@@ -34,18 +34,38 @@ export default defineConfig({
     // 優化建置配置
     rollupOptions: {
       output: {
-        // 手動分割 vendor chunks
+        // 手動分割 vendor chunks - 進一步細分以減少首屏載入
         manualChunks(id) {
           if (id.includes('node_modules')) {
-            if (id.includes('vue') || id.includes('vue-router')) {
-              return 'vue-vendor'
+            // Vue 核心 - 單獨拆分
+            if (id.includes('vue/dist')) {
+              return 'vue-core'
             }
-            if (id.includes('reka-ui') || id.includes('lucide-vue-next')) {
-              return 'ui-vendor'
+            // Vue Router - 單獨拆分
+            if (id.includes('vue-router')) {
+              return 'vue-router'
             }
+            // Vue 相關但非核心
+            if (id.includes('@vue/') || id.includes('vue')) {
+              return 'vue-ecosystem'
+            }
+            // UI 組件庫 - 拆分
+            if (id.includes('reka-ui')) {
+              return 'reka-ui'
+            }
+            // 圖標庫 - 單獨拆分（按需加載）
+            if (id.includes('lucide-vue-next')) {
+              return 'lucide-icons'
+            }
+            // VueUse 工具庫
             if (id.includes('@vueuse')) {
-              return 'utils-vendor'
+              return 'vueuse'
             }
+            // Tailwind 相關
+            if (id.includes('tailwind') || id.includes('clsx') || id.includes('class-variance-authority')) {
+              return 'tailwind-utils'
+            }
+            // 其他第三方庫
             return 'vendor'
           }
         }
