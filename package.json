@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "prebuild": "bun scripts/generate-seo-files.js",
     "build": "vue-tsc -b && vite build",
     "preview": "vite preview"
   },

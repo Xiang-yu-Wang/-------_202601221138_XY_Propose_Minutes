@@ -6,12 +6,17 @@ import { getSEOConfig } from '@/data/seo'
 /**
  * SEO composable
  * 自動管理每個頁面的 meta 標籤
+ * 
+ * 域名配置：使用 VITE_SEO_URL 環境變數
+ * - .env: 開發環境
+ * - .env.production: 生產環境
+ * - .env.local: 本機個人覆蓋（.gitignore 已忽略）
  */
 export function useSEO() {
   const route = useRoute()
   
-  // 基礎 URL（開發環境使用 localhost，生產環境替換）
-  const baseURL = import.meta.env.PROD ? 'https://example.com' : 'http://localhost:5173'
+  // 基礎 URL 從環境變數讀取
+  const baseURL = import.meta.env.VITE_SEO_URL as string
   
   // 獲取當前頁面的 SEO 配置
   const seoConfig = computed(() => getSEOConfig(route.path))

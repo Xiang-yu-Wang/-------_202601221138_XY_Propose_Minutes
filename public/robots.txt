@@ -1,4 +1,9 @@
 User-agent: *
 Allow: /
+Disallow: /admin
 
-Sitemap: https://example.com/sitemap.xml
+Sitemap: https://my-final-domain.com/sitemap.xml
+
+# 尊重 robots.txt，避免過度爬蟲
+User-agent: *
+Crawl-delay: 1
