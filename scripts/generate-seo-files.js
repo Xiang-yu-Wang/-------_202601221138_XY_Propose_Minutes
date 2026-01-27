@@ -92,6 +92,7 @@ try {
   console.log(`\n✅ SEO 檔案生成完成！`)
   console.log(`   使用域名: ${baseURL}`)
   console.log(`   提示: 修改 .env.production 以更新生產環境域名\n`)
+  process.exit(0)
 } catch (error) {
   console.error('❌ SEO 檔案生成失敗:', error)
   process.exit(1)
