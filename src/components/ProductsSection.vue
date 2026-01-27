@@ -2,9 +2,10 @@
 import { ShoppingBag, Plus, Minus } from 'lucide-vue-next'
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { products } from '@/data/products'
+import { useProductManager } from '@/composables/useProductManager'
 import { useCart } from '@/composables/useCart'
 
+const { products } = useProductManager()
 const { cart, addToCart, removeFromCart, getCartCount, getTotalPrice } = useCart()
 </script>
 
