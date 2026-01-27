@@ -6,14 +6,27 @@
  * "prebuild": "bun scripts/generate-seo-files.js"
  */
 
-import { writeFileSync } from 'fs'
+import { writeFileSync, readFileSync, existsSync } from 'fs'
 import { resolve, dirname } from 'path'
 import { fileURLToPath } from 'url'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 
-// 從環境變數讀取域名，預設為 example.com
-const baseURL = process.env.VITE_SEO_URL || 'https://example.com'
+// 讀取 .env.production 檔案
+function loadProductionEnv() {
+  const envPath = resolve(__dirname, '../.env.production')
+  if (existsSync(envPath)) {
+    const envContent = readFileSync(envPath, 'utf-8')
+    const match = envContent.match(/VITE_SEO_URL=(.+)/)
+    if (match) {
+      return match[1].trim()
+    }
+  }
+  return null
+}
+
+// 從環境變數或 .env.production 讀取域名
+const baseURL = process.env.VITE_SEO_URL || loadProductionEnv() || 'https://example.com'
 
 // 所有網站頁面
 const pages = [
