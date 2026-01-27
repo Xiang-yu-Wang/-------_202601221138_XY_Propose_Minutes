@@ -2,6 +2,9 @@
 
 一個現代化的 Vue 3 + TypeScript + Vite 單頁應用，用於大倉代領股東紀念品服務的營銷著陸頁。
 
+> **🎉 新功能！** 已整合公告管理系統，讓內容管理員可直接在網頁上管理公告，無需編輯代碼！  
+> 👉 快速入門指南：[QUICK_START_FOR_BOSS.md](QUICK_START_FOR_BOSS.md)
+
 ## 技術棧
 
 - **Vue 3** - 採用 Composition API 與 `<script setup>` 語法
@@ -14,6 +17,7 @@
 
 ## 功能特性
 
+### 🎯 核心功能
 - 🎨 響應式設計，支援行動裝置
 - ⚡ 快速的開發伺服器與生產構建
 - 📱 流暢的頁面滾動與導航
@@ -21,9 +25,21 @@
 - 📧 聯絡表單與線上預約
 - 💳 服務方案展示
 - 🎯 虛擬滾動導航追蹤
+
+### 🔍 SEO 與結構化數據
 - 🔍 **完整 SEO 優化**（meta 標籤、sitemap、robots.txt）
 - 📊 **JSON-LD 結構化數據**（9 種 Schema.org 類型，40+ 結構化片段）
 - ⭐ **Google Rich Results**（FAQ、商品卡片、職位列表、評價星級）
+
+### 📢 公告管理系統 ✨ NEW
+- 🎯 **無需技術背景**即可管理公告
+- ⚡ **即時同步**到首頁和公告頁面
+- 💾 **備份與復原**功能（導出/導入 JSON）
+- 🔐 **密碼保護**的管理後台
+- 📊 **統計面板**顯示公告數量
+- 📝 **分類管理**（重要/新消息/一般資訊）
+
+**管理後台地址**: `http://localhost:5173/#/admin`（預設密碼: `admin123`）
 
 ## 專案結構
 
@@ -42,12 +58,25 @@ src/
 │   ├── ContactSection.vue
 │   ├── FooterSection.vue
 │   ├── UploadSection.vue
+│   ├── AdminPanel.vue       # 🆕 公告管理面板
 │   └── ui/                  # shadcn-vue 元件
+├── views/                   # 頁面視圖
+│   ├── HomeView.vue
+│   ├── AnnouncementsView.vue
+│   ├── AdminView.vue        # 🆕 管理後台頁面
+│   └── ...
 ├── composables/             # 自訂 Vue Composition
 │   ├── useScrollSpy.ts      # 滾動監控
 │   ├── useSEO.ts            # SEO meta 標籤管理
 │   ├── useJsonLd.ts         # JSON-LD 結構化數據
-│   └── useResourcePreload.ts # 資源預載與 Web Vitals
+│   ├── useResourcePreload.ts # 資源預載與 Web Vitals
+│   └── useAnnouncementManager.ts # 🆕 公告管理邏輯
+├── data/                    # 數據管理
+│   ├── announcements.ts     # 公告預設數據
+│   ├── products.ts
+│   └── ...
+├── router/                  # Vue Router
+│   └── index.ts             # 路由配置（含 /admin）
 └── lib/
     └── utils.ts            # 工具函數 (cn())
 ```
@@ -67,6 +96,8 @@ bun run dev
 ```
 
 應用將在 [http://localhost:5173](http://localhost:5173) 開啟
+
+**📢 管理公告**: 訪問 `http://localhost:5173/#/admin` 進入公告管理後台（預設密碼: `admin123`）
 
 ### 生產構建
 
@@ -149,6 +180,25 @@ const count = ref(0)
 - LINE：`@792nvftc`
 - 郵箱：`playegg903@gmail.com`
 
+#### 管理公告 ✨ NEW
+無需編輯代碼，直接在管理後台操作：
+
+1. **訪問管理後台**: `http://localhost:5173/#/admin`
+2. **登入**: 預設密碼 `admin123`
+3. **管理公告**: 
+   - 新增公告 → 立即同步到首頁
+   - 編輯公告 → 即時更新
+   - 刪除公告 → 立即移除
+   - 導出備份 → 下載 JSON 檔案
+   - 導入復原 → 上傳備份恢復
+
+**詳細說明**: 
+- 給老闆: [QUICK_START_FOR_BOSS.md](QUICK_START_FOR_BOSS.md) - 5 分鐘快速入門
+- 給開發者: [QUICK_REFERENCE.md](QUICK_REFERENCE.md) - 快速參考卡
+- 完整文檔: [ANNOUNCEMENT_MANAGEMENT_GUIDE.md](ANNOUNCEMENT_MANAGEMENT_GUIDE.md)
+
+**修改密碼**: 編輯 `.env` 檔案中的 `VITE_ADMIN_PASSWORD`
+
 #### 驗證 JSON-LD 結構化數據
 開發環境中檢查：
 ```bash
@@ -173,6 +223,24 @@ bun run preview
 - `components.json` - shadcn-vue 設定（風格：New York，基色：Stone）
 - `vite.config.ts` - Vite 設定與路徑別名 `@/` 指向 `./src`
 - `tsconfig.json` - TypeScript 設定（嚴格模式啟用）
+- `.env` - 環境變數（包含管理後台密碼 `VITE_ADMIN_PASSWORD`）
+
+## 文檔導航
+
+### 📚 完整文檔列表
+- **[DOCS_NAVIGATION.md](DOCS_NAVIGATION.md)** - 文檔總導航（推薦從這裡開始）
+
+### 🎯 給不同角色的快速入口
+- **老闆/內容管理員**: [QUICK_START_FOR_BOSS.md](QUICK_START_FOR_BOSS.md) - 5 分鐘學會管理公告
+- **開發者**: [QUICK_REFERENCE.md](QUICK_REFERENCE.md) - 開發快速參考
+- **部署人員**: [DEPLOYMENT_CHECKLIST.md](DEPLOYMENT_CHECKLIST.md) - 部署檢查清單
+- **項目經理**: [DELIVERY_SUMMARY.md](DELIVERY_SUMMARY.md) - 完整交付清單
+
+### 📖 詳細文檔
+- [ANNOUNCEMENT_MANAGEMENT_GUIDE.md](ANNOUNCEMENT_MANAGEMENT_GUIDE.md) - 公告系統完整指南
+- [ANNOUNCEMENT_SYSTEM_COMPLETE.md](ANNOUNCEMENT_SYSTEM_COMPLETE.md) - 技術架構說明
+- [SEO_QUICK_START.md](SEO_QUICK_START.md) - SEO 快速配置
+- [JSON_LD_COMPLETE.md](JSON_LD_COMPLETE.md) - 結構化數據說明
 
 ## 色彩系統
 
