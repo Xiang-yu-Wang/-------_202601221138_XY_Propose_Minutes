@@ -1,7 +1,7 @@
 <template>
   <footer class="bg-gray-900 text-white py-12">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="grid md:grid-cols-3 gap-8 mb-8">
+      <div class="grid md:grid-cols-4 gap-8 mb-8">
         <!-- Brand -->
         <div>
           <h3 class="text-2xl font-bold mb-4">大倉代領股東紀念品</h3>
@@ -10,24 +10,40 @@
           </p>
         </div>
 
-        <!-- Quick links -->
+        <!-- Main links -->
         <div>
-          <h4 class="text-lg font-semibold mb-4">快速連結</h4>
+          <h4 class="text-lg font-semibold mb-4">主要服務</h4>
           <ul class="space-y-2">
             <li>
-              <a href="#hero" class="text-gray-400 hover:text-white transition-colors">首頁</a>
+              <RouterLink to="/" class="text-gray-400 hover:text-white transition-colors">首頁</RouterLink>
             </li>
             <li>
-              <a href="#services" class="text-gray-400 hover:text-white transition-colors">服務介紹</a>
+              <RouterLink to="/services" class="text-gray-400 hover:text-white transition-colors">服務介紹</RouterLink>
             </li>
             <li>
-              <a href="#plans" class="text-gray-400 hover:text-white transition-colors">方案說明</a>
+              <RouterLink to="/plans" class="text-gray-400 hover:text-white transition-colors">方案說明</RouterLink>
             </li>
             <li>
-              <a href="#gallery" class="text-gray-400 hover:text-white transition-colors">交貨實績</a>
+              <RouterLink to="/products" class="text-gray-400 hover:text-white transition-colors">商品</RouterLink>
+            </li>
+          </ul>
+        </div>
+
+        <!-- More info links -->
+        <div>
+          <h4 class="text-lg font-semibold mb-4">更多資訊</h4>
+          <ul class="space-y-2">
+            <li>
+              <RouterLink to="/gallery" class="text-gray-400 hover:text-white transition-colors">交貨實績</RouterLink>
             </li>
             <li>
-              <a href="#contact" class="text-gray-400 hover:text-white transition-colors">聯絡我們</a>
+              <RouterLink to="/announcements" class="text-gray-400 hover:text-white transition-colors">公告</RouterLink>
+            </li>
+            <li>
+              <RouterLink to="/recruitment" class="text-gray-400 hover:text-white transition-colors">招募</RouterLink>
+            </li>
+            <li>
+              <RouterLink to="/community" class="text-gray-400 hover:text-white transition-colors">社群</RouterLink>
             </li>
           </ul>
         </div>
@@ -35,11 +51,11 @@
         <!-- Contact info -->
         <div>
           <h4 class="text-lg font-semibold mb-4">聯絡資訊</h4>
-          <ul class="space-y-2 text-gray-400">
-            <li>電話：0982-571-134（贊哥）</li>
-            <li>LINE：@792nvftc</li>
-            <li>Email：playegg903@gmail.com</li>
-            <li>地址：板橋區民治街71巷58號1樓</li>
+          <ul class="space-y-2 text-gray-400 text-sm">
+            <li>📞 電話：0982-571-134（贊哥）</li>
+            <li>💬 LINE：@792nvftc</li>
+            <li>📧 Email：playegg903@gmail.com</li>
+            <li>📍 地址：板橋區民治街71巷58號1樓</li>
           </ul>
         </div>
       </div>
@@ -75,3 +91,7 @@
     </div>
   </footer>
 </template>
+
+<script setup lang="ts">
+import { RouterLink } from 'vue-router'
+</script>
