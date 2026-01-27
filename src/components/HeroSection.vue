@@ -25,8 +25,7 @@ onMounted(() => {
   }
 
   if ('requestIdleCallback' in window) {
-    // @ts-expect-error - 瀏覽器原生 API
-    requestIdleCallback(preloadIdle, { timeout: 3000 })
+    (window as any).requestIdleCallback(preloadIdle, { timeout: 3000 })
   } else {
     setTimeout(preloadIdle, 1800)
   }
@@ -39,8 +38,8 @@ onMounted(() => {
     <div class="absolute inset-0 bg-gradient-to-br from-emerald-600 via-teal-600 to-cyan-700"></div>
     <!-- Background image with blur placeholder -->
     <img 
-      :src="heroImage.src"
-      :srcset="heroImage.srcSet"
+      :src="heroImage.src.value"
+      :srcset="heroImage.srcSet.value"
       :sizes="heroImage.sizes"
       alt="背景圖"
       loading="eager"
