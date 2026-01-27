@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { useToggle, useEventListener } from '@vueuse/core'
+import { useToggle, useEventListener, useThrottleFn } from '@vueuse/core'
 import { useRoute } from 'vue-router'
 import { Menu, X } from 'lucide-vue-next'
 import { Button } from '@/components/ui/button'
@@ -8,22 +8,22 @@ import { navItems } from '@/data/navigation'
 const [isMenuOpen, toggleMenu] = useToggle(false)
 const route = useRoute()
 
-// Prefetch route components on hover
-const prefetchRoute = async (path: string) => {
-  // Map paths to their corresponding view imports
-  const routeMap: Record<string, () => Promise<any>> = {
-    '/': () => import('@/views/HomeView.vue'),
-    '/announcements': () => import('@/views/AnnouncementsView.vue'),
-    '/products': () => import('@/views/ProductsView.vue'),
-    '/recruitment': () => import('@/views/RecruitmentView.vue'),
-    '/community': () => import('@/views/CommunityView.vue'),
-    '/services': () => import('@/views/ServicesView.vue'),
-    '/plans': () => import('@/views/PlansView.vue'),
-    '/gallery': () => import('@/views/GalleryView.vue'),
-    '/upload': () => import('@/views/UploadView.vue'),
-    '/contact': () => import('@/views/ContactView.vue'),
-  }
+// Route 路徑到視圖的映射
+const routeMap: Record<string, () => Promise<any>> = {
+  '/': () => import('@/views/HomeView.vue'),
+  '/announcements': () => import('@/views/AnnouncementsView.vue'),
+  '/products': () => import('@/views/ProductsView.vue'),
+  '/recruitment': () => import('@/views/RecruitmentView.vue'),
+  '/community': () => import('@/views/CommunityView.vue'),
+  '/services': () => import('@/views/ServicesView.vue'),
+  '/plans': () => import('@/views/PlansView.vue'),
+  '/gallery': () => import('@/views/GalleryView.vue'),
+  '/upload': () => import('@/views/UploadView.vue'),
+  '/contact': () => import('@/views/ContactView.vue'),
+}
 
+// 預取 route components（節流以避免過度加載）
+const prefetchRoute = useThrottleFn(async (path: string) => {
   const loader = routeMap[path]
   if (loader) {
     try {
@@ -33,7 +33,7 @@ const prefetchRoute = async (path: string) => {
       void error
     }
   }
-}
+}, 500)
 
 // Check if current route matches
 const isActive = (path: string) => {

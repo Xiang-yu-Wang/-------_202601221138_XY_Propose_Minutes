@@ -7,6 +7,21 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge" />
     <meta name="theme-color" content="#059669" />
     
+    <!-- 資源預加載優化 -->
+    <!-- DNS 預解析 - 加速外部資源 -->
+    <link rel="dns-prefetch" href="https://images.unsplash.com" />
+    <link rel="dns-prefetch" href="https://cdn.jsdelivr.net" />
+    
+    <!-- 預連接 - 建立 TCP 連線 -->
+    <link rel="preconnect" href="https://images.unsplash.com" crossorigin />
+    <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin />
+    
+    <!-- 預加載關鍵英雄圖片 -->
+    <link rel="preload" as="image" href="https://images.unsplash.com/photo-1553729459-efe14ef6055d?auto=format&fit=crop&w=1920&q=80" />
+    
+    <!-- 預加載主要 JavaScript 和 CSS（Vite 會自動注入，這裡作為備份） -->
+    <link rel="preload" as="script" href="/src/main.ts" />
+    
     <!-- 基礎 SEO Meta 標籤 -->
     <meta name="description" content="只需一股即可領取，代購高機率發放股票，代領股東紀念品。870檔精選公司，一鍵買齊，省時省力。聯絡電話：0982-571-134" />
     <meta name="keywords" content="股東紀念品,代領,股東禮品,一股,股票代購,股東會,免費送貨" />

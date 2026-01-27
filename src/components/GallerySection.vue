@@ -13,6 +13,13 @@ import { galleryImages } from '@/data/gallery'
 const currentPage = ref(1)
 const pageSize = 6
 
+// 生成響應式縮圖 srcset
+const widths = [320, 480, 640, 960, 1200]
+const buildSrcSet = (url: string) =>
+  widths.map(w => `${url.replace(/w_\d+/, `w_${w}`)} ${w}w`).join(', ')
+
+const thumbnailUrl = (url: string) => url.replace(/w_\d+/, 'w_640')
+
 // Computed pagination values
 const pageCount = computed(() => Math.ceil(galleryImages.length / pageSize))
 const isFirstPage = computed(() => currentPage.value === 1)
@@ -52,10 +59,13 @@ const next = () => {
               class="relative group cursor-pointer overflow-hidden rounded-xl aspect-square bg-gray-200"
             >
               <img
-                :src="image"
+                :src="thumbnailUrl(image)"
+                :srcset="buildSrcSet(image)"
+                sizes="(max-width: 768px) 50vw, 360px"
                 :alt="`交貨照片 ${(currentPage - 1) * 6 + index + 1}`"
                 class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
                 loading="lazy"
+                decoding="async"
               />
               <div class="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-colors flex items-center justify-center">
                 <ZoomIn class="w-8 h-8 text-white opacity-0 group-hover:opacity-100 transition-opacity" />

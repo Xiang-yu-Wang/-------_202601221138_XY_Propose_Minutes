@@ -2,7 +2,7 @@ User-agent: *
 Allow: /
 Disallow: /admin
 
-Sitemap: https://my-final-domain.com/sitemap.xml
+Sitemap: http://localhost:5173/sitemap.xml
 
 # 尊重 robots.txt，避免過度爬蟲
 User-agent: *
