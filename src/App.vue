@@ -12,12 +12,29 @@ useSEO()
   <div class="min-h-screen">
     <Navbar />
     <main>
-      <RouterView />
+      <Transition
+        name="fade"
+        mode="out-in"
+      >
+        <RouterView :key="$route.path" />
+      </Transition>
     </main>
     <FooterSection />
     <ScrollToTop />
   </div>
 </template>
+
+<style scoped>
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.3s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+</style>
 
 <style>
 html {
