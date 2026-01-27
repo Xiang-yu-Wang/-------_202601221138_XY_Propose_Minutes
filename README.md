@@ -68,6 +68,24 @@ bun run dev
 bun run build
 ```
 
+**Windows 用戶注意**：如果遇到建置錯誤（exit code 9），請先手動清理 dist 目錄：
+
+```powershell
+# 清理後重新建置
+Remove-Item dist -Recurse -Force -ErrorAction SilentlyContinue
+bun run build
+
+# 或使用提供的清理腳本
+powershell -ExecutionPolicy Bypass -File scripts/clean-dist.ps1
+bun run build
+```
+
+建置產出會自動進行以下優化：
+- ✅ 自動分割 vendor chunks (vue-vendor, ui-vendor, utils-vendor)
+- ✅ CSS 代碼分割
+- ✅ 移除開發用 console 語句
+- ✅ Gzip 壓縮（總大小約 0.31 MB）
+
 ### 預覽生產構建
 
 ```bash

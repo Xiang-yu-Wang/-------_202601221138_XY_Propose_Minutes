@@ -51,9 +51,10 @@ export function dnsPrefetch(domain: string) {
 
 /**
  * 報告 Core Web Vitals（用於監控性能）
+ * 僅在開發環境啟用
  */
 export function reportWebVitals() {
-  if (typeof window === 'undefined') return
+  if (typeof window === 'undefined' || import.meta.env.PROD) return
 
   // 監控 Cumulative Layout Shift (CLS)
   new PerformanceObserver((entryList) => {
