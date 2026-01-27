@@ -114,21 +114,118 @@ bun run build
 # 或使用提供的清理腳本
 powershell -ExecutionPolicy Bypass -File scripts/clean-dist.ps1
 bun run build
+
+# 穩定建置（直接使用 Node，避免 bunx 退出碼問題）
+node ./node_modules/vite/bin/vite.js build
 ```
 
 建置產出會自動進行以下優化：
-- ✅ 自動分割 vendor chunks (v
-- ✅ **自動生成 SEO 檔案**（sitemap.xml、robots.txt）
-
-**SEO 部署準備**：部署前請修改 `.env.production` 中的域名，詳見 [SEO_QUICK_START.md](SEO_QUICK_START.md)ue-vendor, ui-vendor, utils-vendor)
+- ✅ 自動分割 vendor chunks (vue-core, vue-ecosystem, vue-router, reka-ui, tailwind-utils)
+- ✅ 自動生成 SEO 檔案（sitemap.xml、robots.txt）
 - ✅ CSS 代碼分割
+- ✅ 路由級動態載入（Gallery、Upload、Admin 等延遲載入）
 - ✅ 移除開發用 console 語句
-- ✅ Gzip 壓縮（總大小約 0.31 MB）
+
+**SEO 部署準備**：部署前請修改 `.env.production` 中的域名，詳見 [SEO_QUICK_START.md](SEO_QUICK_START.md)
 
 ### 預覽生產構建
 
 ```bash
 bun run preview
+```
+
+## 部署
+
+### GitHub Pages 自動部署 🚀
+
+專案已內建 GitHub Actions 工作流，推送到 `main` 或 `master` 分支時自動建置並部署到 GitHub Pages。
+
+#### 啟用 GitHub Pages
+
+1. **前往 Repo 設定**
+   - 進入 GitHub 儲存庫
+   - 點擊 `Settings` → `Pages`
+
+2. **設定部署來源**
+   - `Source`: 選擇 **GitHub Actions**
+   - 儲存變更
+
+3. **推送觸發部署**
+   ```bash
+   git add .
+   git commit -m "Enable GitHub Pages deployment"
+   git push origin main
+   ```
+
+4. **查看部署狀態**
+   - 進入 `Actions` 標籤查看工作流執行
+   - 部署成功後，在 `Settings` → `Pages` 可看到網站網址
+   - 通常格式為：`https://<username>.github.io/<repo-name>/`
+
+#### 自訂網域（選用）
+
+如果你有自己的網域（如 `dakura-gifts.com.tw`）：
+
+1. **更新 `vite.config.ts` base 路徑**
+   ```typescript
+   // 從相對路徑改為根路徑（使用自訂網域時）
+   base: "/",  // 原本是 "./"
+   ```
+
+2. **新增 CNAME 檔案**
+   ```bash
+   echo "your-domain.com" > public/CNAME
+   ```
+
+3. **在 DNS 設定 A 記錄或 CNAME**
+   - 參考 [GitHub Pages 自訂網域文檔](https://docs.github.com/en/pages/configuring-a-custom-domain-for-your-github-pages-site)
+
+4. **在 GitHub Settings → Pages 輸入自訂網域並啟用 HTTPS**
+
+#### 故障排除
+
+**問題：部署失敗，提示權限錯誤**
+- 確認 Repo → `Settings` → `Actions` → `General` → `Workflow permissions` 設為 **Read and write permissions**
+
+**問題：頁面空白或 404**
+- 檢查 `vite.config.ts` 的 `base` 設定：
+  - 使用子路徑：`base: "/repo-name/"`（需與 Repo 名稱一致）
+  - 使用自訂網域或根路徑：`base: "/"`
+- 確認 `dist/index.html` 內的資源路徑正確
+
+**問題：CSS 或 JS 載入失敗**
+- 打開瀏覽器開發者工具查看 Network 標籤
+- 確認資源路徑是否正確（應對應 `base` 設定）
+- 若使用子路徑部署但 `base` 設為 `"./"` 或 `"/"`，會導致資源載入失敗
+
+**問題：SEO 檔案中的網址錯誤**
+- 編輯 `.env.production` 更新 `VITE_SEO_URL` 為實際部署網址
+- 重新執行 `bun run build` 生成新的 `sitemap.xml` 和 `robots.txt`
+
+### 其他部署平台
+
+#### Vercel / Netlify
+```bash
+# Build Command
+bun run build
+
+# Output Directory
+dist
+
+# Install Command
+bun install
+```
+
+#### Cloudflare Pages
+```bash
+# Build Command
+node ./node_modules/vite/bin/vite.js build
+
+# Build Output Directory
+dist
+
+# Root Directory
+(留空或填 /)
 ```
 
 ## 開發指南
