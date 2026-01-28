@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { onMounted } from 'vue'
 import Navbar from './components/Navbar.vue'
+import AnnouncementBanner from './components/AnnouncementBanner.vue'
 import FooterSection from './components/FooterSection.vue'
 import ScrollToTop from './components/ScrollToTop.vue'
 import { useSEO } from '@/composables/useSEO'
@@ -26,6 +27,7 @@ onMounted(() => {
 <template>
   <div class="min-h-screen">
     <Navbar />
+    <AnnouncementBanner />
     <main>
       <Transition
         name="fade"

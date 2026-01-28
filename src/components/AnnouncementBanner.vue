@@ -12,9 +12,9 @@ const latestAnnouncements = computed(() => announcements.value.slice(0, 2))
 </script>
 
 <template>
-  <section class="py-12 bg-gradient-to-r from-amber-50 to-orange-50">
+  <section class="fixed top-16 left-0 right-0 z-40 py-3 bg-gradient-to-r from-amber-50 to-orange-50 shadow-sm">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="flex flex-col md:flex-row items-start md:items-center gap-4">
+      <div class="flex items-center gap-4">
         <!-- Icon and title -->
         <div class="flex items-center gap-3 shrink-0">
           <div class="w-10 h-10 bg-amber-500 rounded-full flex items-center justify-center">
@@ -24,8 +24,8 @@ const latestAnnouncements = computed(() => announcements.value.slice(0, 2))
         </div>
 
         <!-- Announcements marquee -->
-        <div class="flex-1 overflow-hidden">
-          <div class="flex flex-col md:flex-row gap-4 md:gap-8">
+        <div class="flex-1 min-w-0">
+          <div class="flex flex-col md:flex-row gap-4 md:gap-8 flex-wrap">
             <div 
               v-for="announcement in latestAnnouncements" 
               :key="announcement.id"

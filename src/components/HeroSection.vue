@@ -34,7 +34,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <section id="hero" class="relative min-h-screen flex items-center justify-center overflow-hidden pt-16">
+  <section id="hero" class="relative min-h-screen flex items-center justify-center overflow-hidden pt-28">
     <!-- Background -->
     <div class="absolute inset-0 bg-gradient-to-br from-emerald-600 via-teal-600 to-cyan-700"></div>
     <!-- Background image with picture element for format optimization -->

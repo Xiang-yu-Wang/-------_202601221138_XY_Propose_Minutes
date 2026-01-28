@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import HeroSection from '@/components/HeroSection.vue'
-import AnnouncementBanner from '@/components/AnnouncementBanner.vue'
 import StatsSection from '@/components/StatsSection.vue'
 import ServicesSection from '@/components/ServicesSection.vue'
 import PlansSection from '@/components/PlansSection.vue'
@@ -17,7 +16,6 @@ useJsonLd({ testimonials })
 <template>
   <div>
     <HeroSection />
-    <AnnouncementBanner />
     <StatsSection />
     <ServicesSection />
     <PlansSection />
