@@ -1,5 +1,5 @@
-name: Build and Deploy
-on: [push,workflow_dispatch]
+name: Build and Deploy (manual)
+on: [workflow_dispatch]
 permissions:
   contents: write
 jobs:
