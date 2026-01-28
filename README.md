@@ -2,8 +2,9 @@
 
 一個現代化的 Vue 3 + TypeScript + Vite 單頁應用，用於大倉代領股東紀念品服務的營銷著陸頁。
 
-> **🎉 新功能！** 已整合公告管理系統，讓內容管理員可直接在網頁上管理公告，無需編輯代碼！  
-> 👉 快速入門指南：[QUICK_START_FOR_BOSS.md](QUICK_START_FOR_BOSS.md)
+> **🎉 新功能！** 已整合內容管理後台，讓非工程師也能輕鬆編輯公告與產品，無需編輯代碼！  
+> 👉 快速入門指南：[QUICK_START_FOR_BOSS.md](QUICK_START_FOR_BOSS.md)  
+> 🔧 最後更新：2026-01-28
 
 ## 技術棧
 
