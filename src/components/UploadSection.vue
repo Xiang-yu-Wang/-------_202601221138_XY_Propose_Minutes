@@ -10,19 +10,49 @@ const uploadFeatures = [
   '支援 JPG、PNG、PDF 格式',
 ]
 
-// 示範圖片 URL（替換為實際的示範圖片）
+// 示範圖片 URL
+// 使用方式：
+// 1. 將截圖放到 public/images/ 資料夾，使用 '/images/xxx.jpg' 格式
+// 2. 或使用外部圖片 URL（如 Imgur、Google Drive 等）
 const exampleImages = [
   {
     title: '電腦版示範',
     description: '顯示投票權憑證、股東編號等資訊',
-    url: 'https://via.placeholder.com/500x400?text=Computer+Version+Example'
+    // TODO: 替換為實際的電腦版投票截圖
+    // 範例: url: '/images/desktop-vote-example.jpg'
+    url: '/images/desktop-vote-example.jpg',
+    placeholder: '請放入電腦版電子投票截圖\n包含投票權憑證、股東編號、公司名稱',
+    aspectRatio: 'landscape' // 電腦版為橫向
   },
   {
     title: '手機版示範',
     description: '手機上的投票截圖範例',
-    url: 'https://via.placeholder.com/350x600?text=Mobile+Version+Example'
+    // TODO: 替換為實際的手機版投票截圖
+    // 範例: url: '/images/mobile-vote-example.jpg'
+    url: '/images/mobile-vote-example.jpg',
+    placeholder: '請放入手機版電子投票截圖\n包含投票權憑證、股東編號、公司名稱',
+    aspectRatio: 'portrait' // 手機版為直向
   }
 ]
+
+// 圖片載入錯誤時顯示 placeholder
+const handleImageError = (event: Event, placeholder: string) => {
+  const img = event.target as HTMLImageElement
+  img.style.display = 'none'
+  const parent = img.parentElement
+  if (parent) {
+    parent.classList.add('flex', 'items-center', 'justify-center', 'p-4')
+    const placeholderDiv = document.createElement('div')
+    placeholderDiv.className = 'text-center text-gray-500'
+    placeholderDiv.innerHTML = `
+      <svg class="w-16 h-16 mx-auto mb-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+      </svg>
+      <p class="whitespace-pre-line text-sm">${placeholder}</p>
+    `
+    parent.appendChild(placeholderDiv)
+  }
+}
 
 const googleFormUrl = 'https://forms.gle/eRKucMuQ8PCJawzX9'
 </script>
@@ -146,16 +176,20 @@ const googleFormUrl = 'https://forms.gle/eRKucMuQ8PCJawzX9'
                 <CardDescription>{{ example.description }}</CardDescription>
               </CardHeader>
               <CardContent>
-                <div class="rounded-lg overflow-hidden bg-gray-100 h-64 flex items-center justify-center border-2 border-dashed border-gray-300">
+                <div 
+                  class="rounded-lg overflow-hidden bg-gray-100 flex items-center justify-center border-2 border-dashed border-gray-300"
+                  :class="example.aspectRatio === 'portrait' ? 'h-80' : 'h-64'"
+                >
                   <img 
                     :src="example.url" 
                     :alt="example.title"
                     loading="lazy"
-                    class="w-full h-full object-cover"
+                    class="w-full h-full object-contain"
+                    @error="handleImageError($event, example.placeholder)"
                   />
                 </div>
                 <p class="text-xs text-gray-500 mt-3 text-center">
-                  示意圖片（需使用實際的投票截圖）
+                  {{ example.description }}
                 </p>
               </CardContent>
             </Card>
