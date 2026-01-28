@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button'
 import AdminPanel from '@/components/AdminPanel.vue'
 import { useTitle } from '@vueuse/core'
 
-useTitle('公告管理後台 - 大倉代領股東紀念品')
+useTitle('內容管理後台 - 大倉代領股東紀念品')
 
 // 簡單的密碼保護
 const password = import.meta.env.VITE_ADMIN_PASSWORD || 'admin123'
@@ -28,8 +28,24 @@ const handleLogin = () => {
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <!-- 標題 -->
       <div class="mb-8">
-        <h1 class="text-4xl font-bold text-gray-900 mb-2">公告管理後台</h1>
-        <p class="text-gray-600">簡易的公告編輯工具，編輯內容即時同步到網站</p>
+        <h1 class="text-4xl font-bold text-gray-900 mb-2">內容管理後台</h1>
+        <p class="text-gray-600">可編輯公告與產品，內容即時同步到網站</p>
+      </div>
+
+      <!-- 快速上手 -->
+      <div class="mb-6 grid gap-4 md:grid-cols-3">
+        <div class="rounded-lg border border-slate-200 bg-white p-4">
+          <div class="text-sm font-semibold text-slate-700 mb-1">步驟 1</div>
+          <p class="text-sm text-slate-600">登入後台並選擇「公告管理」或「產品管理」。</p>
+        </div>
+        <div class="rounded-lg border border-slate-200 bg-white p-4">
+          <div class="text-sm font-semibold text-slate-700 mb-1">步驟 2</div>
+          <p class="text-sm text-slate-600">新增或編輯內容，按「更新/新增」立即生效。</p>
+        </div>
+        <div class="rounded-lg border border-slate-200 bg-white p-4">
+          <div class="text-sm font-semibold text-slate-700 mb-1">步驟 3</div>
+          <p class="text-sm text-slate-600">完成後使用「導出」備份，避免資料遺失。</p>
+        </div>
       </div>
 
       <!-- 警告提示 -->

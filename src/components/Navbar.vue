@@ -84,6 +84,13 @@ useEventListener('keydown', (e) => {
                 class="absolute -bottom-1 left-0 right-0 h-0.5 bg-emerald-600"
               />
             </RouterLink>
+            <RouterLink
+              to="/admin"
+              class="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-4 py-2 text-white font-semibold shadow-sm hover:bg-emerald-700 transition-colors"
+              @mouseenter="prefetchRoute('/admin')"
+            >
+              管理後台
+            </RouterLink>
             <a
               href="https://www.facebook.com/groups/call0982571134"
               target="_blank"
@@ -120,6 +127,13 @@ useEventListener('keydown', (e) => {
           class="block py-2 text-gray-700 hover:text-emerald-600 transition-colors"
         >
           {{ item.name }}
+        </RouterLink>
+        <RouterLink
+          to="/admin"
+          @click="closeMenu"
+          class="block py-2 text-emerald-700 font-semibold"
+        >
+          管理後台
         </RouterLink>
         <a
           href="https://www.facebook.com/groups/call0982571134"

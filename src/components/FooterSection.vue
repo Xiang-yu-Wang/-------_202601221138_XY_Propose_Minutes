@@ -40,6 +40,9 @@
               <RouterLink to="/announcements" class="text-gray-400 hover:text-white transition-colors">公告</RouterLink>
             </li>
             <li>
+              <RouterLink to="/admin" class="text-gray-400 hover:text-white transition-colors">管理後台</RouterLink>
+            </li>
+            <li>
               <RouterLink to="/recruitment" class="text-gray-400 hover:text-white transition-colors">招募</RouterLink>
             </li>
             <li>
