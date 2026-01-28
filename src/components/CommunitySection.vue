@@ -2,7 +2,7 @@
 import { Users, MessageCircle, Share2 } from 'lucide-vue-next'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { qrCodeUrl, communityLinks } from '@/data/community'
+import { qrCodeUrl, communityGroupQrCodeUrl, communityLinks } from '@/data/community'
 </script>
 
 <template>
@@ -20,20 +20,20 @@ import { qrCodeUrl, communityLinks } from '@/data/community'
         </p>
       </div>
 
-      <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start max-w-5xl mx-auto">
-        <!-- QR Code Section -->
-        <div class="lg:col-span-1 flex justify-center">
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start max-w-5xl mx-auto">
+        <!-- Official LINE QR Code Section -->
+        <div class="flex justify-center">
           <Card class="bg-white shadow-xl hover:shadow-2xl transition-shadow w-full max-w-sm">
             <CardHeader class="text-center pb-4">
-              <CardTitle class="text-lg">掃描 QR Code</CardTitle>
-              <CardDescription class="text-sm">使用手機掃描加入官方 LINE</CardDescription>
+              <CardTitle class="text-lg">官方 LINE</CardTitle>
+              <CardDescription class="text-sm">加入官方帳號，獲得即時服務</CardDescription>
             </CardHeader>
             <CardContent class="flex flex-col items-center space-y-4">
               <!-- QR Code Image -->
               <div class="bg-white p-4 rounded-lg border-4 border-gray-200">
                 <img 
                   :src="qrCodeUrl" 
-                  alt="LINE QR Code - 大倉代領股東紀念品"
+                  alt="LINE 官方帳號 QR Code"
                   loading="lazy"
                   class="w-56 h-56 object-contain"
                 />
@@ -54,38 +54,71 @@ import { qrCodeUrl, communityLinks } from '@/data/community'
           </Card>
         </div>
 
-        <!-- Social Links Section -->
-        <div class="lg:col-span-2 space-y-4">
-          <h3 class="text-2xl font-bold text-gray-900 mb-6">其他加入方式</h3>
-          
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <Card 
-              v-for="link in communityLinks"
-              :key="link.title"
-              class="bg-white hover:shadow-lg transition-shadow cursor-pointer group"
+        <!-- LINE Group QR Code Section -->
+        <div class="flex justify-center">
+          <Card class="bg-white shadow-xl hover:shadow-2xl transition-shadow w-full max-w-sm">
+            <CardHeader class="text-center pb-4">
+              <CardTitle class="text-lg">LINE 社群</CardTitle>
+              <CardDescription class="text-sm">加入官方社群，與股東交流</CardDescription>
+            </CardHeader>
+            <CardContent class="flex flex-col items-center space-y-4">
+              <!-- QR Code Image -->
+              <div class="bg-white p-4 rounded-lg border-4 border-gray-200">
+                <img 
+                  :src="communityGroupQrCodeUrl" 
+                  alt="LINE 社群 QR Code"
+                  loading="lazy"
+                  class="w-56 h-56 object-contain"
+                />
+              </div>
+              <div class="text-center">
+                <p class="text-sm text-gray-600 mb-3">掃描二維碼快速加入</p>
+                <Button
+                  as-child
+                  class="w-full bg-green-500 hover:bg-green-600 text-white font-semibold"
+                >
+                  <a href="https://line.me/R/ti/p/@792nvftc" target="_blank" rel="noopener noreferrer">
+                    <MessageCircle class="w-4 h-4 mr-2" />
+                    點擊加入社群
+                  </a>
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+
+      <!-- Other Ways to Join Section -->
+      <div class="mt-12 max-w-4xl mx-auto">
+        <h3 class="text-2xl font-bold text-gray-900 mb-6 text-center">其他加入方式</h3>
+        
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <Card 
+            v-for="link in communityLinks"
+            :key="link.title"
+            class="bg-white hover:shadow-lg transition-shadow cursor-pointer group"
+          >
+            <a 
+              :href="link.link"
+              :target="link.target"
+              class="block h-full"
+              rel="noopener noreferrer"
             >
-              <a 
-                :href="link.link"
-                :target="link.target"
-                class="block h-full"
-                rel="noopener noreferrer"
-              >
-                <CardHeader>
-                  <div class="text-4xl mb-2">{{ link.icon }}</div>
-                  <CardTitle class="text-lg group-hover:text-emerald-600 transition-colors">
-                    {{ link.title }}
-                  </CardTitle>
-                  <CardDescription class="text-sm">{{ link.description }}</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div class="flex items-center gap-2 text-emerald-600 group-hover:translate-x-1 transition-transform">
-                    <span class="font-medium">前往</span>
-                    <Share2 class="w-4 h-4" />
-                  </div>
-                </CardContent>
-              </a>
-            </Card>
-          </div>
+              <CardHeader>
+                <div class="text-4xl mb-2">{{ link.icon }}</div>
+                <CardTitle class="text-lg group-hover:text-emerald-600 transition-colors">
+                  {{ link.title }}
+                </CardTitle>
+                <CardDescription class="text-sm">{{ link.description }}</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div class="flex items-center gap-2 text-emerald-600 group-hover:translate-x-1 transition-transform">
+                  <span class="font-medium">前往</span>
+                  <Share2 class="w-4 h-4" />
+                </div>
+              </CardContent>
+            </a>
+          </Card>
         </div>
       </div>
 
