@@ -13,7 +13,7 @@ export const positions: JobPosition[] = [
   {
     id: 1,
     title: '業務代理人',
-    salary: '時薪 $200-280',
+    salary: '高獎金承攬制 按件計酬',
     location: '全台',
     type: '兼職/全職',
     requirements: [
@@ -27,7 +27,7 @@ export const positions: JobPosition[] = [
   {
     id: 2,
     title: '行政客服',
-    salary: '月薪 $25,000-32,000',
+    salary: '月薪 $30,000 + 獎金',
     location: '台北',
     type: '全職',
     requirements: [
@@ -41,7 +41,7 @@ export const positions: JobPosition[] = [
   {
     id: 3,
     title: '倉儲物流人員',
-    salary: '月薪 $24,000-30,000',
+    salary: '月薪 $30,000 + 獎金',
     location: '台北',
     type: '全職',
     requirements: [
