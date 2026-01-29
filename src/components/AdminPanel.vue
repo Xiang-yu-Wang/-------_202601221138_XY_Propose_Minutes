@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import { Package, Github, Key, Megaphone } from 'lucide-vue-next'
+import { Package, Github, Key, Megaphone, Image } from 'lucide-vue-next'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -10,6 +10,7 @@ import { useProductManager } from '@/composables/useProductManager'
 import { useGitHubSync } from '@/composables/useGitHubSync'
 import AdminAnnouncementsTab from '@/components/admin/AdminAnnouncementsTab.vue'
 import AdminProductsTab from '@/components/admin/AdminProductsTab.vue'
+import AdminDeliveryPhotosTab from '@/components/admin/AdminDeliveryPhotosTab.vue'
 
 // 公告管理 (只取 announcements 給 GitHub 同步用)
 const { announcements } = useAnnouncementManager()
@@ -84,7 +85,7 @@ const handleSyncProducts = async () => {
 }
 
 // 頁籤管理
-const activeTab = ref<'announcements' | 'products'>('announcements')
+const activeTab = ref<'announcements' | 'products' | 'deliveryPhotos'>('announcements')
 </script>
 
 <template>
@@ -183,6 +184,18 @@ const activeTab = ref<'announcements' | 'products'>('announcements')
         <Package class="w-4 h-4" />
         產品管理
       </button>
+      <button
+        @click="activeTab = 'deliveryPhotos'"
+        :class="[
+          'px-6 py-3 font-semibold transition-colors flex items-center gap-2',
+          activeTab === 'deliveryPhotos'
+            ? 'border-b-2 border-emerald-600 text-emerald-600'
+            : 'text-gray-600 hover:text-gray-900'
+        ]"
+      >
+        <Image class="w-4 h-4" />
+        交貨照管理
+      </button>
     </div>
 
     <!-- 公告管理 -->
@@ -199,6 +212,13 @@ const activeTab = ref<'announcements' | 'products'>('announcements')
       :has-token="!!token"
       :is-syncing="isSyncing"
       @sync-to-git-hub="handleSyncProducts"
+    />
+
+    <!-- 交貨照管理 -->
+    <AdminDeliveryPhotosTab 
+      v-show="activeTab === 'deliveryPhotos'" 
+      :has-token="!!token"
+      :is-syncing="isSyncing"
     />
   </div>
 </template>
