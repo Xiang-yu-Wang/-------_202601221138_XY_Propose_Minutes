@@ -19,8 +19,8 @@ const exampleImages = [
     title: '電腦版示範',
     description: '顯示投票權憑證、股東編號等資訊',
     // TODO: 替換為實際的電腦版投票截圖
-    // 範例: url: '/images/desktop-vote-example.jpg'
-    url: '/images/desktop-vote-example.jpg',
+    // 範例: url: './images/desktop-vote-example.jpg'
+    url: './images/desktop-vote-example.jpg',
     placeholder: '請放入電腦版電子投票截圖\n包含投票權憑證、股東編號、公司名稱',
     aspectRatio: 'landscape' // 電腦版為橫向
   },
@@ -28,8 +28,8 @@ const exampleImages = [
     title: '手機版示範',
     description: '手機上的投票截圖範例',
     // TODO: 替換為實際的手機版投票截圖
-    // 範例: url: '/images/mobile-vote-example.jpg'
-    url: '/images/mobile-vote-example.jpg',
+    // 範例: url: './images/mobile-vote-example.jpg'
+    url: './images/mobile-vote-example.jpg',
     placeholder: '請放入手機版電子投票截圖\n包含投票權憑證、股東編號、公司名稱',
     aspectRatio: 'portrait' // 手機版為直向
   }
