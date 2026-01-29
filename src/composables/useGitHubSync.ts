@@ -167,6 +167,40 @@ export const products: Product[] = ${JSON.stringify(products, null, 2)}
   )
 }
 
+// 將 deliveryPhotos 同步到 GitHub
+const syncDeliveryPhotosToGitHub = async (deliveryPhotos: any[]) => {
+  const path = 'src/data/deliveryPhotos.ts'
+  
+  // 產生 TypeScript 內容
+  const content = `// 此檔案由管理後台自動產生，請勿手動編輯
+// 交貨照照片數據
+export interface DeliveryPhoto {
+  id: string
+  url: string
+  title: string
+  description: string
+  date: string
+  location: string
+}
+
+export const deliveryPhotos: DeliveryPhoto[] = ${JSON.stringify(deliveryPhotos, null, 2)}
+`
+
+  // 取得目前檔案的 SHA
+  const file = await getFileContent(path)
+  if (!file) {
+    throw new Error('無法讀取目前檔案')
+  }
+
+  // 更新到 GitHub
+  await updateFile(
+    path,
+    content,
+    `chore: 更新交貨照資料 (${new Date().toISOString()})`,
+    file.sha
+  )
+}
+
 export function useGitHubSync() {
   return {
     token,
@@ -174,6 +208,7 @@ export function useGitHubSync() {
     saveToken,
     clearToken,
     syncAnnouncementsToGitHub,
-    syncProductsToGitHub
+    syncProductsToGitHub,
+    syncDeliveryPhotosToGitHub
   }
 }

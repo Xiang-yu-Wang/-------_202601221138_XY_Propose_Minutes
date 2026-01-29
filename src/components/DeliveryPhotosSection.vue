@@ -7,10 +7,10 @@ import {
   DialogContent,
   DialogTrigger,
 } from '@/components/ui/dialog'
-import { useDeliveryPhotoManager } from '@/composables/useDeliveryPhotoManager'
+import { useSupabaseDeliveryPhotoManager } from '@/composables/useSupabaseDeliveryPhotoManager'
 
-// 使用 composable 讀取動態數據（與後台管理同步）
-const { deliveryPhotos } = useDeliveryPhotoManager()
+// 使用 Supabase composable 讀取動態數據（雲端同步）
+const { deliveryPhotos, loading } = useSupabaseDeliveryPhotoManager()
 
 // Pagination state
 const currentPage = ref(1)

@@ -1,32 +1,29 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue'
-import { Trash2, Plus, Download, Upload, RotateCcw, Edit2 } from 'lucide-vue-next'
+import { Trash2, Plus, Download, Upload, RotateCcw, Edit2, RefreshCw } from 'lucide-vue-next'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
-import { useDeliveryPhotoManager } from '@/composables/useDeliveryPhotoManager'
+import { useSupabaseDeliveryPhotoManager } from '@/composables/useSupabaseDeliveryPhotoManager'
 import type { DeliveryPhoto } from '@/data/deliveryPhotos'
 
-// Props
-defineProps<{
-  hasToken: boolean
-  isSyncing: boolean
-}>()
-
-// 交貨照管理
+// 交貨照管理（使用 Supabase）
 const { 
   deliveryPhotos, 
+  loading,
+  error,
   addDeliveryPhoto, 
   updateDeliveryPhoto, 
   deleteDeliveryPhoto, 
   resetToDefault, 
   exportAsJson, 
   importFromJson, 
+  fetchDeliveryPhotos,
   stats 
-} = useDeliveryPhotoManager()
+} = useSupabaseDeliveryPhotoManager()
 
 // 表單狀態
 const isFormOpen = ref(false)
@@ -192,11 +189,11 @@ const handleReset = () => {
       </Card>
       <Card>
         <CardHeader class="pb-3">
-          <CardTitle class="text-sm font-medium">存儲狀態</CardTitle>
+          <CardTitle class="text-sm font-medium">雲端同步</CardTitle>
         </CardHeader>
         <CardContent>
           <div class="text-2xl font-bold text-emerald-600">✓</div>
-          <p class="text-xs text-gray-500 mt-1">本地存儲已啟用</p>
+          <p class="text-xs text-gray-500 mt-1">Supabase 雲端資料庫</p>
         </CardContent>
       </Card>
     </div>
@@ -320,6 +317,22 @@ const handleReset = () => {
         <RotateCcw class="w-4 h-4" />
         重置為預設
       </Button>
+
+      <!-- 重新載入按鈕 -->
+      <Button
+        variant="outline"
+        @click="fetchDeliveryPhotos"
+        :disabled="loading"
+        class="gap-2"
+      >
+        <RefreshCw class="w-4 h-4" :class="{ 'animate-spin': loading }" />
+        {{ loading ? '載入中...' : '重新載入' }}
+      </Button>
+    </div>
+
+    <!-- 錯誤提示 -->
+    <div v-if="error" class="p-4 bg-red-50 border border-red-200 rounded-lg">
+      <p class="text-red-700 text-sm">❌ {{ error }}</p>
     </div>
 
     <!-- 交貨照列表 -->
@@ -327,11 +340,16 @@ const handleReset = () => {
       <CardHeader>
         <CardTitle>交貨照列表</CardTitle>
         <CardDescription>
-          管理所有交貨照，可新增、編輯或刪除
+          管理所有交貨照，可新增、編輯或刪除（自動同步到雲端）
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <div v-if="deliveryPhotos.length === 0" class="text-center py-8">
+        <div v-if="loading" class="text-center py-8">
+          <RefreshCw class="w-8 h-8 animate-spin mx-auto text-emerald-600" />
+          <p class="text-gray-500 mt-2">載入中...</p>
+        </div>
+
+        <div v-else-if="deliveryPhotos.length === 0" class="text-center py-8">
           <p class="text-gray-500">還沒有任何交貨照，點擊「新增交貨照」開始添加</p>
         </div>
 

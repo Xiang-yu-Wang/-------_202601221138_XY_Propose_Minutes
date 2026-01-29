@@ -102,6 +102,42 @@ export type Database = {
         }
         Relationships: []
       }
+      delivery_photos: {
+        Row: {
+          id: string
+          url: string
+          title: string
+          description: string | null
+          date: string
+          location: string
+          sort_order: number
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          url: string
+          title: string
+          description?: string | null
+          date: string
+          location: string
+          sort_order?: number
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          url?: string
+          title?: string
+          description?: string | null
+          date?: string
+          location?: string
+          sort_order?: number
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

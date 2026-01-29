@@ -7,6 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { useAnnouncementManager } from '@/composables/useAnnouncementManager'
 import { useProductManager } from '@/composables/useProductManager'
+import { useDeliveryPhotoManager } from '@/composables/useDeliveryPhotoManager'
 import { useGitHubSync } from '@/composables/useGitHubSync'
 import AdminAnnouncementsTab from '@/components/admin/AdminAnnouncementsTab.vue'
 import AdminProductsTab from '@/components/admin/AdminProductsTab.vue'
@@ -18,8 +19,11 @@ const { announcements } = useAnnouncementManager()
 // 產品管理 (只取 products 給 GitHub 同步用)
 const { products } = useProductManager()
 
+// 交貨照管理 (只取 deliveryPhotos 給 GitHub 同步用)
+const { deliveryPhotos } = useDeliveryPhotoManager()
+
 // GitHub 同步
-const { token, loadToken, saveToken, clearToken, syncAnnouncementsToGitHub, syncProductsToGitHub } = useGitHubSync()
+const { token, loadToken, saveToken, clearToken, syncAnnouncementsToGitHub, syncProductsToGitHub, syncDeliveryPhotosToGitHub } = useGitHubSync()
 const isTokenDialogOpen = ref(false)
 const tokenInput = ref('')
 const isSyncing = ref(false)
@@ -84,6 +88,28 @@ const handleSyncProducts = async () => {
   }
 }
 
+// 同步交貨照到 GitHub
+const handleSyncDeliveryPhotos = async () => {
+  if (!token.value) {
+    alert('請先設定 GitHub Token')
+    isTokenDialogOpen.value = true
+    return
+  }
+
+  if (!confirm('確定要同步交貨照到 GitHub？這將更新遠端倉庫的檔案。')) {
+    return
+  }
+
+  isSyncing.value = true
+  try {
+    await syncDeliveryPhotosToGitHub(deliveryPhotos.value)
+    alert('交貨照已同步到 GitHub！\n\n請等待 GitHub Actions 自動部署完成（約 1-2 分鐘）。')
+  } catch (error) {
+    alert('同步失敗：' + (error instanceof Error ? error.message : String(error)))
+  } finally {
+    isSyncing.value = false
+  }
+}
 // 頁籤管理
 const activeTab = ref<'announcements' | 'products' | 'deliveryPhotos'>('announcements')
 </script>
@@ -214,11 +240,9 @@ const activeTab = ref<'announcements' | 'products' | 'deliveryPhotos'>('announce
       @sync-to-git-hub="handleSyncProducts"
     />
 
-    <!-- 交貨照管理 -->
+    <!-- 交貨照管理（使用 Supabase 自動同步） -->
     <AdminDeliveryPhotosTab 
       v-show="activeTab === 'deliveryPhotos'" 
-      :has-token="!!token"
-      :is-syncing="isSyncing"
     />
   </div>
 </template>
