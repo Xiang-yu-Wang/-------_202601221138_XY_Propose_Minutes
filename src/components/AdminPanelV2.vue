@@ -1,6 +1,12 @@
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue'
-import { Trash2, Plus, Download, Upload, RotateCcw, Edit2, Image as ImageIcon, Package, Eye, EyeOff, LogOut, Mail, Lock, AlertCircle, Loader2 } from 'lucide-vue-next'
+import { 
+  Trash2, Plus, Download, Upload, RotateCcw, Edit2, 
+  Image as ImageIcon, Package, Eye, EyeOff, LogOut, 
+  Mail, Lock, AlertCircle, Loader2, Megaphone, 
+  BarChart3, CheckCircle, XCircle, Tag, Shield,
+  Database, Cloud, HardDrive
+} from 'lucide-vue-next'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
@@ -57,6 +63,7 @@ const {
 const loginEmail = ref('')
 const loginPassword = ref('')
 const loginError = ref('')
+const showPassword = ref(false)
 
 // 頁籤管理
 const activeTab = ref<'announcements' | 'products'>('announcements')
@@ -75,7 +82,6 @@ const handleLogin = async () => {
   if (!result.success) {
     loginError.value = result.error || '登入失敗'
   } else {
-    // 登入成功後重新載入數據
     await fetchAnnouncements()
     await fetchProducts()
   }
@@ -89,7 +95,6 @@ const handleLogout = async () => {
 // 初始化
 onMounted(async () => {
   await initialize()
-  // 載入數據（公開讀取）
   await fetchAnnouncements()
   await fetchProducts()
 })
@@ -265,16 +270,17 @@ const handleImageUpload = async (event: Event) => {
   const file = target.files?.[0]
   if (!file) return
 
-  try {
-    const url = await uploadImage(file)
-    if (url) {
-      productFormData.value.image_url = url
-      imagePreview.value = url
-    } else {
-      alert('圖片上傳失敗')
-    }
-  } catch (error) {
-    alert(error instanceof Error ? error.message : '圖片上傳失敗')
+  // 預覽
+  const reader = new FileReader()
+  reader.onload = (e) => {
+    imagePreview.value = e.target?.result as string
+  }
+  reader.readAsDataURL(file)
+
+  // 上傳
+  const url = await uploadImage(file)
+  if (url) {
+    productFormData.value.image_url = url
   }
 }
 
@@ -287,7 +293,7 @@ const handleProductSubmit = async () => {
   const productData = {
     name: productFormData.value.name,
     category: productFormData.value.category,
-    price: Number(productFormData.value.price),
+    price: productFormData.value.price || 0,
     image_url: productFormData.value.image_url || null,
     description: productFormData.value.description || null,
     available: productFormData.value.available
@@ -321,10 +327,7 @@ const handleProductDelete = async (id: string) => {
 }
 
 const handleToggleAvailability = async (id: string) => {
-  const result = await toggleAvailability(id)
-  if (!result.success) {
-    alert('切換狀態失敗：' + result.error)
-  }
+  await toggleAvailability(id)
 }
 
 const handleProductExport = () => {
@@ -365,15 +368,15 @@ const handleProductReset = async () => {
   }
 }
 
-// 類型標籤顏色
+// 工具函數
 const getTypeColor = (type: string) => {
   switch (type) {
     case 'important':
-      return 'bg-red-100 text-red-700'
+      return 'bg-red-100 text-red-700 border-red-200'
     case 'new':
-      return 'bg-emerald-100 text-emerald-700'
+      return 'bg-emerald-100 text-emerald-700 border-emerald-200'
     default:
-      return 'bg-blue-100 text-blue-700'
+      return 'bg-blue-100 text-blue-700 border-blue-200'
   }
 }
 
@@ -393,537 +396,576 @@ const isConfigured = computed(() => isSupabaseConfigured())
 </script>
 
 <template>
-  <div class="space-y-6">
-    <!-- Supabase 未配置警告 -->
-    <Card v-if="!isConfigured" class="border-amber-200 bg-amber-50">
-      <CardHeader>
-        <CardTitle class="flex items-center gap-2 text-amber-900">
-          <AlertCircle class="w-5 h-5" />
-          Supabase 尚未配置
-        </CardTitle>
-        <CardDescription class="text-amber-800">
-          目前使用本地儲存模式。請設定環境變數以啟用雲端功能。
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        <p class="text-sm text-amber-900">
-          請在 <code class="bg-white px-1 rounded">.env.local</code> 檔案中設定：
-        </p>
-        <pre class="mt-2 p-2 bg-white rounded text-xs overflow-x-auto">
-VITE_SUPABASE_URL=your_supabase_url
-VITE_SUPABASE_ANON_KEY=your_anon_key</pre>
-        <p class="mt-2 text-sm text-amber-900">
-          詳細說明請參考 <code class="bg-white px-1 rounded">SUPABASE_SETUP.md</code>
-        </p>
-      </CardContent>
-    </Card>
-
-    <!-- 登入表單 -->
-    <Card v-if="isConfigured && !isAuthenticated && !authLoading" class="max-w-md mx-auto">
-      <CardHeader>
-        <CardTitle>管理員登入</CardTitle>
-        <CardDescription>請使用 Supabase 帳號登入</CardDescription>
-      </CardHeader>
-      <CardContent class="space-y-4">
-        <div v-if="loginError" class="p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm flex items-center gap-2">
-          <AlertCircle class="w-4 h-4" />
-          {{ loginError }}
+  <div class="min-h-screen bg-gradient-to-br from-slate-50 via-white to-emerald-50/30">
+    <!-- 頂部標題列 -->
+    <div class="bg-white/80 backdrop-blur-sm border-b border-slate-200 sticky top-0 z-40">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-xl flex items-center justify-center shadow-lg shadow-emerald-500/20">
+              <Shield class="w-5 h-5 text-white" />
+            </div>
+            <div>
+              <h1 class="text-xl font-bold text-slate-900">管理後台</h1>
+              <p class="text-sm text-slate-500">大倉代領股東紀念品</p>
+            </div>
+          </div>
+          
+          <!-- 儲存模式指示 -->
+          <div class="flex items-center gap-3">
+            <div v-if="isConfigured" class="flex items-center gap-2 px-3 py-1.5 bg-emerald-50 text-emerald-700 rounded-full text-sm">
+              <Cloud class="w-4 h-4" />
+              <span class="hidden sm:inline">雲端模式</span>
+            </div>
+            <div v-else class="flex items-center gap-2 px-3 py-1.5 bg-amber-50 text-amber-700 rounded-full text-sm">
+              <HardDrive class="w-4 h-4" />
+              <span class="hidden sm:inline">本地模式</span>
+            </div>
+            
+            <!-- 用戶狀態 -->
+            <div v-if="isAuthenticated" class="flex items-center gap-2">
+              <div class="hidden sm:flex items-center gap-2 px-3 py-1.5 bg-slate-100 rounded-full text-sm text-slate-600">
+                <Mail class="w-4 h-4" />
+                {{ userEmail }}
+              </div>
+              <Button variant="ghost" size="sm" @click="handleLogout" class="text-slate-600 hover:text-red-600">
+                <LogOut class="w-4 h-4" />
+              </Button>
+            </div>
+          </div>
         </div>
-        
-        <div class="space-y-2">
-          <label class="text-sm font-medium flex items-center gap-2">
-            <Mail class="w-4 h-4" />
-            Email
-          </label>
-          <Input 
-            v-model="loginEmail" 
-            type="email" 
-            placeholder="admin@example.com"
-            @keyup.enter="handleLogin"
-          />
-        </div>
-        
-        <div class="space-y-2">
-          <label class="text-sm font-medium flex items-center gap-2">
-            <Lock class="w-4 h-4" />
-            密碼
-          </label>
-          <Input 
-            v-model="loginPassword" 
-            type="password" 
-            placeholder="••••••••"
-            @keyup.enter="handleLogin"
-          />
-        </div>
-        
-        <Button @click="handleLogin" class="w-full" :disabled="authLoading">
-          <Loader2 v-if="authLoading" class="w-4 h-4 mr-2 animate-spin" />
-          登入
-        </Button>
-      </CardContent>
-    </Card>
-
-    <!-- 載入中 -->
-    <div v-else-if="authLoading" class="flex justify-center py-12">
-      <Loader2 class="w-8 h-8 animate-spin text-emerald-600" />
+      </div>
     </div>
 
-    <!-- 已登入的管理界面 -->
-    <template v-else-if="isAuthenticated || !isConfigured">
-      <!-- 用戶資訊欄 -->
-      <div v-if="isAuthenticated" class="flex items-center justify-between p-4 bg-emerald-50 border border-emerald-200 rounded-lg">
-        <div class="flex items-center gap-2 text-emerald-800">
-          <Mail class="w-5 h-5" />
-          <span class="font-medium">{{ userEmail }}</span>
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      <!-- Supabase 未配置提示 -->
+      <div v-if="!isConfigured" class="mb-6 p-4 bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200 rounded-2xl">
+        <div class="flex items-start gap-3">
+          <div class="w-10 h-10 bg-amber-100 rounded-xl flex items-center justify-center shrink-0">
+            <Database class="w-5 h-5 text-amber-600" />
+          </div>
+          <div class="flex-1">
+            <h3 class="font-semibold text-amber-900">Supabase 尚未配置</h3>
+            <p class="text-sm text-amber-700 mt-1">目前使用本地儲存模式，資料僅存於此瀏覽器。</p>
+            <div class="mt-3 p-3 bg-white/60 rounded-xl">
+              <code class="text-xs text-amber-800 font-mono">
+                VITE_SUPABASE_URL=your_url<br/>
+                VITE_SUPABASE_ANON_KEY=your_key
+              </code>
+            </div>
+          </div>
         </div>
-        <Button variant="outline" size="sm" @click="handleLogout">
-          <LogOut class="w-4 h-4 mr-2" />
-          登出
-        </Button>
       </div>
 
-      <!-- 頁籤切換 -->
-      <div class="flex gap-2 border-b">
-        <button
-          @click="activeTab = 'announcements'"
-          :class="[
-            'px-6 py-3 font-semibold transition-colors',
-            activeTab === 'announcements'
-              ? 'border-b-2 border-emerald-600 text-emerald-600'
-              : 'text-gray-600 hover:text-gray-900'
-          ]"
-        >
-          公告管理
-        </button>
-        <button
-          @click="activeTab = 'products'"
-          :class="[
-            'px-6 py-3 font-semibold transition-colors flex items-center gap-2',
-            activeTab === 'products'
-              ? 'border-b-2 border-emerald-600 text-emerald-600'
-              : 'text-gray-600 hover:text-gray-900'
-          ]"
-        >
-          <Package class="w-4 h-4" />
-          產品管理
-        </button>
-      </div>
-
-      <!-- 公告管理 -->
-      <div v-show="activeTab === 'announcements'" class="space-y-6">
-        <!-- 統計卡片 -->
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <Card>
-            <CardHeader class="pb-2">
-              <CardTitle class="text-sm font-medium text-gray-600">總公告數</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div class="text-3xl font-bold">{{ stats.total }}</div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader class="pb-2">
-              <CardTitle class="text-sm font-medium text-red-600">重要</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div class="text-3xl font-bold text-red-600">{{ stats.important }}</div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader class="pb-2">
-              <CardTitle class="text-sm font-medium text-emerald-600">新消息</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div class="text-3xl font-bold text-emerald-600">{{ stats.new }}</div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader class="pb-2">
-              <CardTitle class="text-sm font-medium text-blue-600">一般</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div class="text-3xl font-bold text-blue-600">{{ stats.info }}</div>
-            </CardContent>
-          </Card>
-        </div>
-
-        <!-- 操作按鈕 -->
-        <div class="flex flex-wrap gap-3">
-          <Dialog v-model:open="isFormOpen">
-            <DialogTrigger as-child>
-              <Button @click="resetForm" class="gap-2" :disabled="!isAuthenticated && isConfigured">
-                <Plus class="w-4 h-4" />
-                新增公告
-              </Button>
-            </DialogTrigger>
-            <DialogContent class="sm:max-w-[600px]">
-              <DialogHeader>
-                <DialogTitle>{{ isEditing ? '編輯公告' : '新增公告' }}</DialogTitle>
-                <DialogDescription>
-                  {{ isEditing ? '修改現有公告的內容' : '建立新的公告' }}
-                </DialogDescription>
-              </DialogHeader>
-
+      <!-- 登入表單 -->
+      <div v-if="isConfigured && !isAuthenticated && !authLoading" class="flex items-center justify-center min-h-[60vh]">
+        <div class="w-full max-w-md">
+          <div class="bg-white rounded-3xl shadow-xl shadow-slate-200/50 overflow-hidden">
+            <!-- 登入頭部 -->
+            <div class="bg-gradient-to-br from-emerald-500 via-teal-500 to-cyan-600 px-8 py-10 text-center">
+              <div class="w-16 h-16 bg-white/20 backdrop-blur rounded-2xl flex items-center justify-center mx-auto mb-4">
+                <Shield class="w-8 h-8 text-white" />
+              </div>
+              <h2 class="text-2xl font-bold text-white">歡迎回來</h2>
+              <p class="text-emerald-100 mt-2">請登入管理後台</p>
+            </div>
+            
+            <!-- 登入表單 -->
+            <div class="p-8">
+              <div v-if="loginError" class="mb-4 p-4 bg-red-50 border border-red-100 rounded-xl text-red-600 text-sm flex items-center gap-2">
+                <AlertCircle class="w-5 h-5 shrink-0" />
+                {{ loginError }}
+              </div>
+              
               <div class="space-y-4">
                 <div>
-                  <label class="text-sm font-medium">標題 *</label>
-                  <Input v-model="formData.title" placeholder="例：春節服務公告" />
-                </div>
-
-                <div class="grid grid-cols-2 gap-4">
-                  <div>
-                    <label class="text-sm font-medium">日期 *</label>
-                    <Input v-model="formData.date" type="date" />
-                  </div>
-                  <div>
-                    <label class="text-sm font-medium">類型 *</label>
-                    <select v-model="formData.type" class="w-full px-3 py-2 border rounded-lg text-sm">
-                      <option value="important">重要</option>
-                      <option value="new">新消息</option>
-                      <option value="info">一般資訊</option>
-                    </select>
+                  <label class="block text-sm font-medium text-slate-700 mb-2">電子郵件</label>
+                  <div class="relative">
+                    <Mail class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+                    <Input 
+                      v-model="loginEmail" 
+                      type="email" 
+                      placeholder="admin@example.com"
+                      class="pl-10 h-12 rounded-xl border-slate-200 focus:border-emerald-500 focus:ring-emerald-500"
+                      @keyup.enter="handleLogin"
+                    />
                   </div>
                 </div>
-
+                
                 <div>
-                  <label class="text-sm font-medium">標籤 (用逗號分隔)</label>
-                  <Input v-model="formData.tags" placeholder="例：服務, 時程, 重要" />
+                  <label class="block text-sm font-medium text-slate-700 mb-2">密碼</label>
+                  <div class="relative">
+                    <Lock class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+                    <Input 
+                      v-model="loginPassword" 
+                      :type="showPassword ? 'text' : 'password'" 
+                      placeholder="••••••••"
+                      class="pl-10 pr-10 h-12 rounded-xl border-slate-200 focus:border-emerald-500 focus:ring-emerald-500"
+                      @keyup.enter="handleLogin"
+                    />
+                    <button 
+                      type="button"
+                      @click="showPassword = !showPassword"
+                      class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                    >
+                      <Eye v-if="!showPassword" class="w-5 h-5" />
+                      <EyeOff v-else class="w-5 h-5" />
+                    </button>
+                  </div>
                 </div>
+                
+                <Button 
+                  @click="handleLogin" 
+                  class="w-full h-12 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-semibold shadow-lg shadow-emerald-500/25"
+                  :disabled="authLoading"
+                >
+                  <Loader2 v-if="authLoading" class="w-5 h-5 mr-2 animate-spin" />
+                  登入管理後台
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
 
-                <div>
-                  <label class="text-sm font-medium">內容 *</label>
-                  <Textarea v-model="formData.content" placeholder="詳細的公告內容..." rows="6" />
+      <!-- 載入中 -->
+      <div v-else-if="authLoading" class="flex flex-col items-center justify-center py-20">
+        <Loader2 class="w-10 h-10 animate-spin text-emerald-600 mb-4" />
+        <p class="text-slate-500">載入中...</p>
+      </div>
+
+      <!-- 已登入的管理界面 -->
+      <template v-else-if="isAuthenticated || !isConfigured">
+        <!-- 頁籤切換 -->
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-1.5 mb-6 inline-flex">
+          <button
+            @click="activeTab = 'announcements'"
+            :class="[
+              'px-6 py-2.5 rounded-xl font-medium transition-all flex items-center gap-2',
+              activeTab === 'announcements'
+                ? 'bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-lg shadow-emerald-500/25'
+                : 'text-slate-600 hover:bg-slate-100'
+            ]"
+          >
+            <Megaphone class="w-4 h-4" />
+            公告管理
+          </button>
+          <button
+            @click="activeTab = 'products'"
+            :class="[
+              'px-6 py-2.5 rounded-xl font-medium transition-all flex items-center gap-2',
+              activeTab === 'products'
+                ? 'bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-lg shadow-emerald-500/25'
+                : 'text-slate-600 hover:bg-slate-100'
+            ]"
+          >
+            <Package class="w-4 h-4" />
+            產品管理
+          </button>
+        </div>
+
+        <!-- 公告管理 -->
+        <div v-show="activeTab === 'announcements'" class="space-y-6">
+          <!-- 統計卡片 -->
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
+              <div class="flex items-center justify-between mb-3">
+                <div class="w-10 h-10 bg-slate-100 rounded-xl flex items-center justify-center">
+                  <BarChart3 class="w-5 h-5 text-slate-600" />
                 </div>
               </div>
+              <p class="text-3xl font-bold text-slate-900">{{ stats.total }}</p>
+              <p class="text-sm text-slate-500 mt-1">總公告數</p>
+            </div>
+            <div class="bg-white rounded-2xl p-5 border border-red-100 shadow-sm hover:shadow-md transition-shadow">
+              <div class="flex items-center justify-between mb-3">
+                <div class="w-10 h-10 bg-red-50 rounded-xl flex items-center justify-center">
+                  <AlertCircle class="w-5 h-5 text-red-500" />
+                </div>
+              </div>
+              <p class="text-3xl font-bold text-red-600">{{ stats.important }}</p>
+              <p class="text-sm text-slate-500 mt-1">重要公告</p>
+            </div>
+            <div class="bg-white rounded-2xl p-5 border border-emerald-100 shadow-sm hover:shadow-md transition-shadow">
+              <div class="flex items-center justify-between mb-3">
+                <div class="w-10 h-10 bg-emerald-50 rounded-xl flex items-center justify-center">
+                  <CheckCircle class="w-5 h-5 text-emerald-500" />
+                </div>
+              </div>
+              <p class="text-3xl font-bold text-emerald-600">{{ stats.new }}</p>
+              <p class="text-sm text-slate-500 mt-1">新消息</p>
+            </div>
+            <div class="bg-white rounded-2xl p-5 border border-blue-100 shadow-sm hover:shadow-md transition-shadow">
+              <div class="flex items-center justify-between mb-3">
+                <div class="w-10 h-10 bg-blue-50 rounded-xl flex items-center justify-center">
+                  <Megaphone class="w-5 h-5 text-blue-500" />
+                </div>
+              </div>
+              <p class="text-3xl font-bold text-blue-600">{{ stats.info }}</p>
+              <p class="text-sm text-slate-500 mt-1">一般公告</p>
+            </div>
+          </div>
 
-              <DialogFooter class="gap-2">
-                <Button variant="outline" @click="isFormOpen = false">取消</Button>
-                <Button @click="handleSubmit" :disabled="announcementLoading">
-                  <Loader2 v-if="announcementLoading" class="w-4 h-4 mr-2 animate-spin" />
-                  {{ isEditing ? '更新' : '新增' }}
+          <!-- 操作按鈕 -->
+          <div class="flex flex-wrap gap-3">
+            <Dialog v-model:open="isFormOpen">
+              <DialogTrigger as-child>
+                <Button 
+                  @click="resetForm" 
+                  class="gap-2 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 shadow-lg shadow-emerald-500/25 rounded-xl" 
+                  :disabled="!isAuthenticated && isConfigured"
+                >
+                  <Plus class="w-4 h-4" />
+                  新增公告
                 </Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
+              </DialogTrigger>
+              <DialogContent class="sm:max-w-[600px] rounded-2xl">
+                <DialogHeader>
+                  <DialogTitle class="text-xl">{{ isEditing ? '編輯公告' : '新增公告' }}</DialogTitle>
+                  <DialogDescription>
+                    {{ isEditing ? '修改現有公告的內容' : '建立新的公告' }}
+                  </DialogDescription>
+                </DialogHeader>
 
-          <Button variant="outline" @click="handleExport" class="gap-2">
-            <Download class="w-4 h-4" />
-            導出
-          </Button>
+                <div class="space-y-4 py-4">
+                  <div>
+                    <label class="text-sm font-medium text-slate-700">標題 *</label>
+                    <Input v-model="formData.title" placeholder="例：春節服務公告" class="mt-1.5 rounded-xl" />
+                  </div>
 
-          <Button variant="outline" @click="fileInput?.click()" class="gap-2" :disabled="!isAuthenticated && isConfigured">
-            <Upload class="w-4 h-4" />
-            導入
-          </Button>
-          <input
-            ref="fileInput"
-            type="file"
-            accept=".json"
-            class="hidden"
-            @change="handleImport"
-          />
+                  <div class="grid grid-cols-2 gap-4">
+                    <div>
+                      <label class="text-sm font-medium text-slate-700">日期 *</label>
+                      <Input v-model="formData.date" type="date" class="mt-1.5 rounded-xl" />
+                    </div>
+                    <div>
+                      <label class="text-sm font-medium text-slate-700">類型 *</label>
+                      <select v-model="formData.type" class="mt-1.5 w-full h-10 px-3 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500">
+                        <option value="important">🔴 重要</option>
+                        <option value="new">🟢 新消息</option>
+                        <option value="info">🔵 一般資訊</option>
+                      </select>
+                    </div>
+                  </div>
 
-          <Dialog>
-            <DialogTrigger as-child>
-              <Button variant="outline" class="gap-2" :disabled="!isAuthenticated && isConfigured">
-                <RotateCcw class="w-4 h-4" />
-                重置
-              </Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>確認重置</DialogTitle>
-                <DialogDescription>
-                  此操作將恢復到預設公告。請先導出備份。
-                </DialogDescription>
-              </DialogHeader>
-              <DialogFooter class="gap-2">
-                <Button variant="outline">取消</Button>
-                <Button variant="destructive" @click="handleReset">確認重置</Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
-        </div>
+                  <div>
+                    <label class="text-sm font-medium text-slate-700">標籤 (用逗號分隔)</label>
+                    <Input v-model="formData.tags" placeholder="例：服務, 時程, 重要" class="mt-1.5 rounded-xl" />
+                  </div>
 
-        <!-- 載入中 -->
-        <div v-if="announcementLoading" class="flex justify-center py-8">
-          <Loader2 class="w-6 h-6 animate-spin text-emerald-600" />
-        </div>
+                  <div>
+                    <label class="text-sm font-medium text-slate-700">內容 *</label>
+                    <Textarea v-model="formData.content" placeholder="詳細的公告內容..." rows="6" class="mt-1.5 rounded-xl" />
+                  </div>
+                </div>
 
-        <!-- 公告列表 -->
-        <Card v-else>
-          <CardHeader>
-            <CardTitle>公告列表</CardTitle>
-            <CardDescription>點擊編輯按鈕修改或刪除公告</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div v-if="announcements.length === 0" class="text-center py-8 text-gray-500">
-              還沒有公告，點擊上方「新增公告」按鈕新增。
+                <DialogFooter class="gap-2">
+                  <Button variant="outline" @click="isFormOpen = false" class="rounded-xl">取消</Button>
+                  <Button @click="handleSubmit" :disabled="announcementLoading" class="rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600">
+                    <Loader2 v-if="announcementLoading" class="w-4 h-4 mr-2 animate-spin" />
+                    {{ isEditing ? '更新' : '新增' }}
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
+
+            <Button variant="outline" @click="handleExport" class="gap-2 rounded-xl">
+              <Download class="w-4 h-4" />
+              導出
+            </Button>
+
+            <Button variant="outline" @click="fileInput?.click()" class="gap-2 rounded-xl" :disabled="!isAuthenticated && isConfigured">
+              <Upload class="w-4 h-4" />
+              導入
+            </Button>
+            <input ref="fileInput" type="file" accept=".json" class="hidden" @change="handleImport" />
+
+            <Dialog>
+              <DialogTrigger as-child>
+                <Button variant="outline" class="gap-2 rounded-xl text-red-600 hover:text-red-700 hover:bg-red-50" :disabled="!isAuthenticated && isConfigured">
+                  <RotateCcw class="w-4 h-4" />
+                  重置
+                </Button>
+              </DialogTrigger>
+              <DialogContent class="rounded-2xl">
+                <DialogHeader>
+                  <DialogTitle>確認重置</DialogTitle>
+                  <DialogDescription>
+                    此操作將清除所有公告並恢復預設值。建議先導出備份。
+                  </DialogDescription>
+                </DialogHeader>
+                <DialogFooter class="gap-2">
+                  <Button variant="outline" class="rounded-xl">取消</Button>
+                  <Button variant="destructive" @click="handleReset" class="rounded-xl">確認重置</Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
+          </div>
+
+          <!-- 載入中 -->
+          <div v-if="announcementLoading" class="flex justify-center py-12">
+            <Loader2 class="w-8 h-8 animate-spin text-emerald-600" />
+          </div>
+
+          <!-- 公告列表 -->
+          <div v-else class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+            <div class="p-5 border-b border-slate-100">
+              <h3 class="font-semibold text-slate-900">公告列表</h3>
+              <p class="text-sm text-slate-500 mt-1">共 {{ announcements.length }} 則公告</p>
+            </div>
+            
+            <div v-if="announcements.length === 0" class="p-12 text-center">
+              <div class="w-16 h-16 bg-slate-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                <Megaphone class="w-8 h-8 text-slate-400" />
+              </div>
+              <p class="text-slate-500">還沒有公告</p>
+              <p class="text-sm text-slate-400 mt-1">點擊上方「新增公告」開始</p>
             </div>
 
-            <div v-else class="space-y-3">
+            <div v-else class="divide-y divide-slate-100">
               <div
                 v-for="announcement in announcements"
                 :key="announcement.id"
-                class="p-4 border rounded-lg hover:bg-gray-50 transition-colors"
+                class="p-5 hover:bg-slate-50/50 transition-colors group"
               >
                 <div class="flex items-start justify-between gap-4">
                   <div class="flex-1 min-w-0">
                     <div class="flex items-center gap-2 mb-2">
-                      <Badge :class="getTypeColor(announcement.type)">
+                      <Badge :class="[getTypeColor(announcement.type), 'rounded-lg px-2.5 py-0.5 text-xs font-medium']">
                         {{ getTypeLabel(announcement.type) }}
                       </Badge>
-                      <span class="text-sm text-gray-500">{{ announcement.date }}</span>
+                      <span class="text-sm text-slate-400">{{ announcement.date }}</span>
                     </div>
-                    <h3 class="font-semibold text-gray-900 break-words">{{ announcement.title }}</h3>
-                    <p class="text-sm text-gray-600 mt-2 break-words">{{ announcement.content }}</p>
-                    <div v-if="announcement.tags && announcement.tags.length > 0" class="flex flex-wrap gap-1 mt-2">
-                      <span v-for="tag in announcement.tags" :key="tag" class="inline-block text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded">
+                    <h4 class="font-semibold text-slate-900 group-hover:text-emerald-600 transition-colors">{{ announcement.title }}</h4>
+                    <p class="text-sm text-slate-600 mt-2 line-clamp-2">{{ announcement.content }}</p>
+                    <div v-if="announcement.tags && announcement.tags.length > 0" class="flex flex-wrap gap-1.5 mt-3">
+                      <span v-for="tag in announcement.tags" :key="tag" class="inline-flex items-center gap-1 text-xs bg-slate-100 text-slate-600 px-2 py-1 rounded-lg">
+                        <Tag class="w-3 h-3" />
                         {{ tag }}
                       </span>
                     </div>
                   </div>
-                  <div v-if="isAuthenticated || !isConfigured" class="flex gap-2 shrink-0">
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      @click="startEdit(announcement)"
-                      class="gap-1"
-                    >
+                  <div v-if="isAuthenticated || !isConfigured" class="flex gap-2 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <Button size="sm" variant="outline" @click="startEdit(announcement)" class="gap-1.5 rounded-lg">
                       <Edit2 class="w-4 h-4" />
                       <span class="hidden sm:inline">編輯</span>
                     </Button>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      @click="handleDelete(announcement.id)"
-                      class="gap-1 text-red-600 hover:text-red-700 hover:bg-red-50"
-                    >
+                    <Button size="sm" variant="outline" @click="handleDelete(announcement.id)" class="gap-1.5 rounded-lg text-red-600 hover:text-red-700 hover:bg-red-50 hover:border-red-200">
                       <Trash2 class="w-4 h-4" />
-                      <span class="hidden sm:inline">刪除</span>
                     </Button>
                   </div>
                 </div>
               </div>
             </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      <!-- 產品管理 -->
-      <div v-show="activeTab === 'products'" class="space-y-6">
-        <!-- 統計卡片 -->
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <Card>
-            <CardHeader class="pb-2">
-              <CardTitle class="text-sm font-medium text-gray-600">總產品數</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div class="text-3xl font-bold">{{ productStats.total }}</div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader class="pb-2">
-              <CardTitle class="text-sm font-medium text-emerald-600">上架中</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div class="text-3xl font-bold text-emerald-600">{{ productStats.available }}</div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader class="pb-2">
-              <CardTitle class="text-sm font-medium text-gray-600">已下架</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div class="text-3xl font-bold text-gray-600">{{ productStats.unavailable }}</div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader class="pb-2">
-              <CardTitle class="text-sm font-medium text-blue-600">分類數</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div class="text-3xl font-bold text-blue-600">{{ productStats.categories }}</div>
-            </CardContent>
-          </Card>
+          </div>
         </div>
 
-        <!-- 操作按鈕 -->
-        <div class="flex flex-wrap gap-3">
-          <Dialog v-model:open="isProductFormOpen">
-            <DialogTrigger as-child>
-              <Button @click="resetProductForm" class="gap-2" :disabled="!isAuthenticated && isConfigured">
-                <Plus class="w-4 h-4" />
-                新增產品
-              </Button>
-            </DialogTrigger>
-            <DialogContent class="sm:max-w-[600px]">
-              <DialogHeader>
-                <DialogTitle>{{ isEditingProduct ? '編輯產品' : '新增產品' }}</DialogTitle>
-                <DialogDescription>
-                  {{ isEditingProduct ? '修改現有產品的資訊' : '建立新的產品' }}
-                </DialogDescription>
-              </DialogHeader>
-
-              <div class="space-y-4">
-                <div>
-                  <label class="text-sm font-medium">產品名稱 *</label>
-                  <Input v-model="productFormData.name" placeholder="例：7-11 商品卡 面額100" />
-                </div>
-
-                <div class="grid grid-cols-2 gap-4">
-                  <div>
-                    <label class="text-sm font-medium">分類 *</label>
-                    <Input v-model="productFormData.category" placeholder="例：超商卡" />
-                  </div>
-                  <div>
-                    <label class="text-sm font-medium">價格</label>
-                    <Input v-model.number="productFormData.price" type="number" placeholder="100" />
-                  </div>
-                </div>
-
-                <div>
-                  <label class="text-sm font-medium">產品圖片</label>
-                  <div class="mt-2">
-                    <div v-if="imagePreview" class="mb-2">
-                      <img :src="imagePreview" alt="預覽" class="w-32 h-32 object-cover rounded-lg" />
-                    </div>
-                    <Button variant="outline" @click="imageFileInput?.click()" class="gap-2">
-                      <ImageIcon class="w-4 h-4" />
-                      {{ imagePreview ? '更換圖片' : '上傳圖片' }}
-                    </Button>
-                    <input
-                      ref="imageFileInput"
-                      type="file"
-                      accept="image/*"
-                      class="hidden"
-                      @change="handleImageUpload"
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <label class="text-sm font-medium">描述</label>
-                  <Textarea v-model="productFormData.description" placeholder="產品描述..." rows="3" />
-                </div>
-
-                <div class="flex items-center gap-2">
-                  <input
-                    type="checkbox"
-                    v-model="productFormData.available"
-                    id="available"
-                    class="w-4 h-4"
-                  />
-                  <label for="available" class="text-sm">上架販售</label>
+        <!-- 產品管理 -->
+        <div v-show="activeTab === 'products'" class="space-y-6">
+          <!-- 統計卡片 -->
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
+              <div class="flex items-center justify-between mb-3">
+                <div class="w-10 h-10 bg-slate-100 rounded-xl flex items-center justify-center">
+                  <Package class="w-5 h-5 text-slate-600" />
                 </div>
               </div>
+              <p class="text-3xl font-bold text-slate-900">{{ productStats.total }}</p>
+              <p class="text-sm text-slate-500 mt-1">總產品數</p>
+            </div>
+            <div class="bg-white rounded-2xl p-5 border border-emerald-100 shadow-sm hover:shadow-md transition-shadow">
+              <div class="flex items-center justify-between mb-3">
+                <div class="w-10 h-10 bg-emerald-50 rounded-xl flex items-center justify-center">
+                  <CheckCircle class="w-5 h-5 text-emerald-500" />
+                </div>
+              </div>
+              <p class="text-3xl font-bold text-emerald-600">{{ productStats.available }}</p>
+              <p class="text-sm text-slate-500 mt-1">上架中</p>
+            </div>
+            <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
+              <div class="flex items-center justify-between mb-3">
+                <div class="w-10 h-10 bg-slate-100 rounded-xl flex items-center justify-center">
+                  <XCircle class="w-5 h-5 text-slate-400" />
+                </div>
+              </div>
+              <p class="text-3xl font-bold text-slate-400">{{ productStats.unavailable }}</p>
+              <p class="text-sm text-slate-500 mt-1">已下架</p>
+            </div>
+            <div class="bg-white rounded-2xl p-5 border border-blue-100 shadow-sm hover:shadow-md transition-shadow">
+              <div class="flex items-center justify-between mb-3">
+                <div class="w-10 h-10 bg-blue-50 rounded-xl flex items-center justify-center">
+                  <Tag class="w-5 h-5 text-blue-500" />
+                </div>
+              </div>
+              <p class="text-3xl font-bold text-blue-600">{{ productStats.categories }}</p>
+              <p class="text-sm text-slate-500 mt-1">分類數</p>
+            </div>
+          </div>
 
-              <DialogFooter class="gap-2">
-                <Button variant="outline" @click="isProductFormOpen = false">取消</Button>
-                <Button @click="handleProductSubmit" :disabled="productLoading">
-                  <Loader2 v-if="productLoading" class="w-4 h-4 mr-2 animate-spin" />
-                  {{ isEditingProduct ? '更新' : '新增' }}
+          <!-- 操作按鈕 -->
+          <div class="flex flex-wrap gap-3">
+            <Dialog v-model:open="isProductFormOpen">
+              <DialogTrigger as-child>
+                <Button 
+                  @click="resetProductForm" 
+                  class="gap-2 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 shadow-lg shadow-emerald-500/25 rounded-xl" 
+                  :disabled="!isAuthenticated && isConfigured"
+                >
+                  <Plus class="w-4 h-4" />
+                  新增產品
                 </Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
+              </DialogTrigger>
+              <DialogContent class="sm:max-w-[600px] rounded-2xl">
+                <DialogHeader>
+                  <DialogTitle class="text-xl">{{ isEditingProduct ? '編輯產品' : '新增產品' }}</DialogTitle>
+                  <DialogDescription>
+                    {{ isEditingProduct ? '修改現有產品的資訊' : '建立新的產品' }}
+                  </DialogDescription>
+                </DialogHeader>
 
-          <Button variant="outline" @click="handleProductExport" class="gap-2">
-            <Download class="w-4 h-4" />
-            導出
-          </Button>
+                <div class="space-y-4 py-4">
+                  <div>
+                    <label class="text-sm font-medium text-slate-700">產品名稱 *</label>
+                    <Input v-model="productFormData.name" placeholder="例：7-11 商品卡 面額100" class="mt-1.5 rounded-xl" />
+                  </div>
 
-          <Button variant="outline" @click="productFileInput?.click()" class="gap-2" :disabled="!isAuthenticated && isConfigured">
-            <Upload class="w-4 h-4" />
-            導入
-          </Button>
-          <input
-            ref="productFileInput"
-            type="file"
-            accept=".json"
-            class="hidden"
-            @change="handleProductImport"
-          />
+                  <div class="grid grid-cols-2 gap-4">
+                    <div>
+                      <label class="text-sm font-medium text-slate-700">分類 *</label>
+                      <Input v-model="productFormData.category" placeholder="例：超商卡" class="mt-1.5 rounded-xl" />
+                    </div>
+                    <div>
+                      <label class="text-sm font-medium text-slate-700">價格</label>
+                      <Input v-model.number="productFormData.price" type="number" placeholder="100" class="mt-1.5 rounded-xl" />
+                    </div>
+                  </div>
 
-          <Dialog>
-            <DialogTrigger as-child>
-              <Button variant="outline" class="gap-2" :disabled="!isAuthenticated && isConfigured">
-                <RotateCcw class="w-4 h-4" />
-                重置
-              </Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>確認重置</DialogTitle>
-                <DialogDescription>
-                  此操作將恢復到預設產品。請先導出備份。
-                </DialogDescription>
-              </DialogHeader>
-              <DialogFooter class="gap-2">
-                <Button variant="outline">取消</Button>
-                <Button variant="destructive" @click="handleProductReset">確認重置</Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
-        </div>
+                  <div>
+                    <label class="text-sm font-medium text-slate-700">產品圖片</label>
+                    <div class="mt-2">
+                      <div v-if="imagePreview" class="mb-3 relative inline-block">
+                        <img :src="imagePreview" alt="預覽" class="w-32 h-32 object-cover rounded-xl border border-slate-200" />
+                      </div>
+                      <Button variant="outline" @click="imageFileInput?.click()" class="gap-2 rounded-xl">
+                        <ImageIcon class="w-4 h-4" />
+                        {{ imagePreview ? '更換圖片' : '上傳圖片' }}
+                      </Button>
+                      <input ref="imageFileInput" type="file" accept="image/*" class="hidden" @change="handleImageUpload" />
+                    </div>
+                  </div>
 
-        <!-- 載入中 -->
-        <div v-if="productLoading" class="flex justify-center py-8">
-          <Loader2 class="w-6 h-6 animate-spin text-emerald-600" />
-        </div>
+                  <div>
+                    <label class="text-sm font-medium text-slate-700">描述</label>
+                    <Textarea v-model="productFormData.description" placeholder="產品描述..." rows="3" class="mt-1.5 rounded-xl" />
+                  </div>
 
-        <!-- 產品列表 -->
-        <Card v-else>
-          <CardHeader>
-            <CardTitle>產品列表</CardTitle>
-            <CardDescription>管理販售中的產品</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div v-if="products.length === 0" class="text-center py-8 text-gray-500">
-              還沒有產品，點擊上方「新增產品」按鈕新增。
+                  <div class="flex items-center gap-3 p-3 bg-slate-50 rounded-xl">
+                    <input type="checkbox" v-model="productFormData.available" id="available" class="w-5 h-5 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500" />
+                    <label for="available" class="text-sm font-medium text-slate-700">上架販售</label>
+                  </div>
+                </div>
+
+                <DialogFooter class="gap-2">
+                  <Button variant="outline" @click="isProductFormOpen = false" class="rounded-xl">取消</Button>
+                  <Button @click="handleProductSubmit" :disabled="productLoading" class="rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600">
+                    <Loader2 v-if="productLoading" class="w-4 h-4 mr-2 animate-spin" />
+                    {{ isEditingProduct ? '更新' : '新增' }}
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
+
+            <Button variant="outline" @click="handleProductExport" class="gap-2 rounded-xl">
+              <Download class="w-4 h-4" />
+              導出
+            </Button>
+
+            <Button variant="outline" @click="productFileInput?.click()" class="gap-2 rounded-xl" :disabled="!isAuthenticated && isConfigured">
+              <Upload class="w-4 h-4" />
+              導入
+            </Button>
+            <input ref="productFileInput" type="file" accept=".json" class="hidden" @change="handleProductImport" />
+
+            <Dialog>
+              <DialogTrigger as-child>
+                <Button variant="outline" class="gap-2 rounded-xl text-red-600 hover:text-red-700 hover:bg-red-50" :disabled="!isAuthenticated && isConfigured">
+                  <RotateCcw class="w-4 h-4" />
+                  重置
+                </Button>
+              </DialogTrigger>
+              <DialogContent class="rounded-2xl">
+                <DialogHeader>
+                  <DialogTitle>確認重置</DialogTitle>
+                  <DialogDescription>
+                    此操作將清除所有產品並恢復預設值。建議先導出備份。
+                  </DialogDescription>
+                </DialogHeader>
+                <DialogFooter class="gap-2">
+                  <Button variant="outline" class="rounded-xl">取消</Button>
+                  <Button variant="destructive" @click="handleProductReset" class="rounded-xl">確認重置</Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
+          </div>
+
+          <!-- 載入中 -->
+          <div v-if="productLoading" class="flex justify-center py-12">
+            <Loader2 class="w-8 h-8 animate-spin text-emerald-600" />
+          </div>
+
+          <!-- 產品列表 -->
+          <div v-else>
+            <div v-if="products.length === 0" class="bg-white rounded-2xl border border-slate-200 p-12 text-center">
+              <div class="w-16 h-16 bg-slate-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                <Package class="w-8 h-8 text-slate-400" />
+              </div>
+              <p class="text-slate-500">還沒有產品</p>
+              <p class="text-sm text-slate-400 mt-1">點擊上方「新增產品」開始</p>
             </div>
 
-            <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div v-else class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
               <div
                 v-for="product in products"
                 :key="product.id"
-                class="p-4 border rounded-lg hover:bg-gray-50 transition-colors"
+                class="bg-white rounded-2xl border border-slate-200 shadow-sm hover:shadow-lg transition-all overflow-hidden group"
               >
-                <div v-if="product.image_url" class="mb-3">
-                  <img :src="product.image_url" :alt="product.name" class="w-full h-32 object-cover rounded-lg" />
+                <div v-if="product.image_url" class="aspect-square bg-slate-100 overflow-hidden">
+                  <img :src="product.image_url" :alt="product.name" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
                 </div>
-                <div class="flex items-center justify-between mb-2">
-                  <Badge :class="product.available ? 'bg-emerald-100 text-emerald-700' : 'bg-gray-100 text-gray-700'">
-                    {{ product.available ? '上架中' : '已下架' }}
-                  </Badge>
-                  <span class="font-bold text-emerald-600">${{ product.price }}</span>
+                <div v-else class="aspect-square bg-gradient-to-br from-slate-100 to-slate-50 flex items-center justify-center">
+                  <Package class="w-12 h-12 text-slate-300" />
                 </div>
-                <h3 class="font-semibold text-gray-900">{{ product.name }}</h3>
-                <p class="text-sm text-gray-500">{{ product.category }}</p>
-                <p v-if="product.description" class="text-sm text-gray-600 mt-1 line-clamp-2">{{ product.description }}</p>
                 
-                <div v-if="isAuthenticated || !isConfigured" class="flex gap-2 mt-3">
-                  <Button size="sm" variant="outline" @click="handleToggleAvailability(product.id)" class="gap-1">
-                    <Eye v-if="!product.available" class="w-4 h-4" />
-                    <EyeOff v-else class="w-4 h-4" />
-                  </Button>
-                  <Button size="sm" variant="outline" @click="startEditProduct(product)" class="gap-1">
-                    <Edit2 class="w-4 h-4" />
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    @click="handleProductDelete(product.id)"
-                    class="gap-1 text-red-600 hover:text-red-700 hover:bg-red-50"
-                  >
-                    <Trash2 class="w-4 h-4" />
-                  </Button>
+                <div class="p-4">
+                  <div class="flex items-center justify-between mb-2">
+                    <Badge :class="[product.available ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-500', 'rounded-lg text-xs']">
+                      {{ product.available ? '上架中' : '已下架' }}
+                    </Badge>
+                    <span class="font-bold text-emerald-600">${{ product.price }}</span>
+                  </div>
+                  <h4 class="font-semibold text-slate-900 line-clamp-1">{{ product.name }}</h4>
+                  <p class="text-sm text-slate-500 mt-0.5">{{ product.category }}</p>
+                  <p v-if="product.description" class="text-sm text-slate-600 mt-2 line-clamp-2">{{ product.description }}</p>
+                  
+                  <div v-if="isAuthenticated || !isConfigured" class="flex gap-2 mt-4 pt-4 border-t border-slate-100">
+                    <Button size="sm" variant="outline" @click="handleToggleAvailability(product.id)" class="flex-1 gap-1.5 rounded-lg">
+                      <Eye v-if="!product.available" class="w-4 h-4" />
+                      <EyeOff v-else class="w-4 h-4" />
+                      {{ product.available ? '下架' : '上架' }}
+                    </Button>
+                    <Button size="sm" variant="outline" @click="startEditProduct(product)" class="rounded-lg">
+                      <Edit2 class="w-4 h-4" />
+                    </Button>
+                    <Button size="sm" variant="outline" @click="handleProductDelete(product.id)" class="rounded-lg text-red-600 hover:text-red-700 hover:bg-red-50 hover:border-red-200">
+                      <Trash2 class="w-4 h-4" />
+                    </Button>
+                  </div>
                 </div>
               </div>
             </div>
-          </CardContent>
-        </Card>
-      </div>
-    </template>
+          </div>
+        </div>
+      </template>
+    </div>
   </div>
 </template>
