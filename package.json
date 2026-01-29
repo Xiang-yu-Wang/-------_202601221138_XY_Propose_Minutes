@@ -12,6 +12,7 @@
     "analyze": "ANALYZE=true bun run build"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.93.2",
     "@tailwindcss/vite": "^4.1.18",
     "@vueuse/core": "^14.1.0",
     "@vueuse/head": "^2.0.0",
