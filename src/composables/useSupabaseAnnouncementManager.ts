@@ -23,6 +23,9 @@ const error = ref<string | null>(null)
 // localStorage 備援 key
 const STORAGE_KEY = 'announcements_data_v2'
 
+// 追蹤訂閱狀態，避免重複訂閱
+let isSubscribed = false
+
 export function useSupabaseAnnouncementManager() {
   // 從 Supabase 載入公告
   const fetchAnnouncements = async () => {
@@ -294,8 +297,31 @@ export function useSupabaseAnnouncementManager() {
   }))
 
   // 初始化時載入數據
+  // 設定實時訂閱（監聽 Supabase 資料庫變化）
+  const subscribeToChanges = () => {
+    if (!isSupabaseConfigured() || isSubscribed) return
+
+    isSubscribed = true
+    supabase
+      .channel('announcements-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'announcements'
+        },
+        async () => {
+          // 任何資料庫變化都觸發重新載入
+          await fetchAnnouncements()
+        }
+      )
+      .subscribe()
+  }
+
   onMounted(() => {
     fetchAnnouncements()
+    subscribeToChanges()
   })
 
   return {
@@ -309,6 +335,7 @@ export function useSupabaseAnnouncementManager() {
     resetToDefault,
     exportAsJson,
     importFromJson,
-    stats
+    stats,
+    subscribeToChanges
   }
 }

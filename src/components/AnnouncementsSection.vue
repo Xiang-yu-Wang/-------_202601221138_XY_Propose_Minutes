@@ -6,11 +6,12 @@ import { useSupabaseAnnouncementManager } from '@/composables/useSupabaseAnnounc
 import { computed, onMounted } from 'vue'
 import type { Announcement } from '@/lib/database.types'
 
-const { announcements, loading, fetchAnnouncements } = useSupabaseAnnouncementManager()
+const { announcements, loading, fetchAnnouncements, subscribeToChanges } = useSupabaseAnnouncementManager()
 
-// 初始化載入資料
+// 初始化載入資料和訂閱實時更新
 onMounted(() => {
   fetchAnnouncements()
+  subscribeToChanges()
 })
 
 // 優化：按類型分組，減少DOM重排
