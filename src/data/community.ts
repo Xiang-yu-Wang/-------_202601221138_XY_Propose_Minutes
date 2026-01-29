@@ -7,11 +7,11 @@ export interface CommunityLink {
   target: string
 }
 
-// 官方 LINE QR code 圖片 URL
-export const qrCodeUrl = '/images/line-official-qr.png'
+// 官方 LINE QR code 圖片 URL (相對路徑)
+export const qrCodeUrl = 'images/line-official-qr.png'
 
-// LINE 社群 QR code 圖片 URL
-export const communityGroupQrCodeUrl = '/images/line-community-qr.png'
+// LINE 社群 QR code 圖片 URL (相對路徑)
+export const communityGroupQrCodeUrl = 'images/line-community-qr.png'
 
 export const communityLinks: CommunityLink[] = [
   {
