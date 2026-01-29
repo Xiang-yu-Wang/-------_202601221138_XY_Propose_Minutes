@@ -5,7 +5,7 @@ const services = [
   {
     icon: Vote,
     title: '自動投票功能',
-    description: '透過我們的系統，您可以輕鬆進行自動投票，不再需要繁瑣的手動操作。',
+    description: '透過合作軟體廠商的系統',
     color: 'from-blue-500 to-indigo-600'
   },
   {
