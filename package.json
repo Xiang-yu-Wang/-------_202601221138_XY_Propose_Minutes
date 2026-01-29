@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "vite",
     "prebuild": "bun scripts/generate-seo-files.js",
-    "build": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/stable-build.ps1",
+    "build": "vite build",
+    "build:windows": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/stable-build.ps1",
     "build:node": "node ./node_modules/vite/bin/vite.js build",
     "preview": "vite preview",
     "analyze": "ANALYZE=true bun run build"
