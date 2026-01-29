@@ -17,5 +17,7 @@ export const supabase: SupabaseClient<Database> = createClient<Database>(
 )
 
 if (!isSupabaseConfigured()) {
-  console.warn('Supabase 環境變數未設定，請設定 VITE_SUPABASE_URL 和 VITE_SUPABASE_ANON_KEY')
+  console.warn('⚠️ Supabase 環境變數未設定，請設定 VITE_SUPABASE_URL 和 VITE_SUPABASE_ANON_KEY')
+} else {
+  console.log('✅ Supabase 已連接：', supabaseUrl.split('.supabase.co')[0])
 }

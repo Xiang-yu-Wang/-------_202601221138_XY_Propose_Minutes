@@ -34,9 +34,11 @@ export function useSupabaseAnnouncementManager() {
       const stored = localStorage.getItem(STORAGE_KEY)
       if (stored) {
         announcements.value = JSON.parse(stored)
+        console.log('📖 從 localStorage 載入公告:', announcements.value.length, '筆')
       } else {
         // 轉換預設數據
         announcements.value = defaultAnnouncements.map(convertLegacyAnnouncement)
+        console.log('📖 使用預設公告:', announcements.value.length, '筆')
       }
       return
     }
@@ -45,21 +47,27 @@ export function useSupabaseAnnouncementManager() {
     error.value = null
 
     try {
+      console.log('📡 正在從 Supabase 載入公告...')
       const { data, error: fetchError } = await supabase
         .from('announcements')
         .select('*')
         .order('date', { ascending: false })
 
-      if (fetchError) throw fetchError
+      if (fetchError) {
+        console.error('❌ Supabase fetch 錯誤:', fetchError)
+        throw fetchError
+      }
 
       announcements.value = data || []
+      console.log('✅ 已載入公告:', announcements.value.length, '筆', announcements.value)
     } catch (e) {
-      console.error('載入公告失敗:', e)
+      console.error('❌ 載入公告失敗:', e)
       error.value = e instanceof Error ? e.message : '載入公告失敗'
       // 備援：使用 localStorage
       const stored = localStorage.getItem(STORAGE_KEY)
       if (stored) {
         announcements.value = JSON.parse(stored)
+        console.log('📖 備援：從 localStorage 載入公告')
       }
     } finally {
       loading.value = false
@@ -84,6 +92,7 @@ export function useSupabaseAnnouncementManager() {
       }
       announcements.value.unshift(newAnnouncement)
       localStorage.setItem(STORAGE_KEY, JSON.stringify(announcements.value))
+      console.log('✅ localStorage 模式：公告已新增', newAnnouncement)
       return { success: true, data: newAnnouncement }
     }
 
@@ -91,18 +100,29 @@ export function useSupabaseAnnouncementManager() {
     error.value = null
 
     try {
+      console.log('📤 正在新增公告到 Supabase:', announcement)
+      
       const { data, error: insertError } = await supabase
         .from('announcements')
         .insert(announcement)
         .select()
         .single()
 
-      if (insertError) throw insertError
+      if (insertError) {
+        console.error('❌ Supabase insert 錯誤:', insertError)
+        throw insertError
+      }
 
-      announcements.value.unshift(data)
+      console.log('✅ Supabase insert 成功:', data)
+      
+      if (data) {
+        announcements.value.unshift(data)
+        console.log('✅ 已新增到本地狀態，目前公告數:', announcements.value.length)
+      }
+      
       return { success: true, data }
     } catch (e) {
-      console.error('新增公告失敗:', e)
+      console.error('❌ 新增公告失敗:', e)
       error.value = e instanceof Error ? e.message : '新增公告失敗'
       return { success: false, error: error.value }
     } finally {
