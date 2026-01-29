@@ -251,6 +251,8 @@ const resetProductForm = () => {
   imagePreview.value = ''
   isEditingProduct.value = false
   editingProductId.value = null
+  uploadError.value = ''
+  isUploadingImage.value = false
 }
 
 const startEditProduct = (product: Product) => {
@@ -268,22 +270,54 @@ const startEditProduct = (product: Product) => {
   isProductFormOpen.value = true
 }
 
+// 圖片上傳狀態
+const isUploadingImage = ref(false)
+const uploadError = ref('')
+
 const handleImageUpload = async (event: Event) => {
   const target = event.target as HTMLInputElement
   const file = target.files?.[0]
   if (!file) return
 
-  // 預覽
+  // 驗證檔案類型
+  const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp']
+  if (!allowedTypes.includes(file.type)) {
+    uploadError.value = '僅支援 JPG、PNG、GIF、WebP 格式'
+    return
+  }
+
+  // 驗證檔案大小 (最大 5MB)
+  const maxSize = 5 * 1024 * 1024
+  if (file.size > maxSize) {
+    uploadError.value = '圖片大小不能超過 5MB'
+    return
+  }
+
+  uploadError.value = ''
+  isUploadingImage.value = true
+
+  // 先建立預覽
   const reader = new FileReader()
   reader.onload = (e) => {
     imagePreview.value = e.target?.result as string
   }
   reader.readAsDataURL(file)
 
-  // 上傳
-  const url = await uploadImage(file)
-  if (url) {
-    productFormData.value.image_url = url
+  try {
+    // 上傳圖片
+    const url = await uploadImage(file)
+    if (url) {
+      productFormData.value.image_url = url
+      console.log('✅ 圖片上傳成功:', url)
+    } else {
+      uploadError.value = '圖片上傳失敗，請稍後再試'
+      console.error('❌ 圖片上傳失敗：未取得 URL')
+    }
+  } catch (e) {
+    uploadError.value = '圖片上傳發生錯誤'
+    console.error('❌ 圖片上傳錯誤:', e)
+  } finally {
+    isUploadingImage.value = false
   }
 }
 
@@ -848,12 +882,32 @@ const isConfigured = computed(() => isSupabaseConfigured())
                     <div class="mt-2">
                       <div v-if="imagePreview" class="mb-3 relative inline-block">
                         <img :src="imagePreview" alt="預覽" class="w-32 h-32 object-cover rounded-xl border border-slate-200" />
+                        <div v-if="isUploadingImage" class="absolute inset-0 bg-black/50 rounded-xl flex items-center justify-center">
+                          <Loader2 class="w-6 h-6 text-white animate-spin" />
+                        </div>
                       </div>
-                      <Button variant="outline" @click="imageFileInput?.click()" class="gap-2 rounded-xl">
-                        <ImageIcon class="w-4 h-4" />
-                        {{ imagePreview ? '更換圖片' : '上傳圖片' }}
-                      </Button>
-                      <input ref="imageFileInput" type="file" accept="image/*" class="hidden" @change="handleImageUpload" />
+                      <div class="flex items-center gap-2">
+                        <Button 
+                          variant="outline" 
+                          @click="imageFileInput?.click()" 
+                          class="gap-2 rounded-xl"
+                          :disabled="isUploadingImage"
+                        >
+                          <Loader2 v-if="isUploadingImage" class="w-4 h-4 animate-spin" />
+                          <ImageIcon v-else class="w-4 h-4" />
+                          {{ isUploadingImage ? '上傳中...' : (imagePreview ? '更換圖片' : '上傳圖片') }}
+                        </Button>
+                        <span v-if="productFormData.image_url && !isUploadingImage" class="text-xs text-emerald-600 flex items-center gap-1">
+                          <CheckCircle class="w-3 h-3" />
+                          已上傳
+                        </span>
+                      </div>
+                      <input ref="imageFileInput" type="file" accept="image/jpeg,image/png,image/gif,image/webp" class="hidden" @change="handleImageUpload" />
+                      <p v-if="uploadError" class="mt-2 text-sm text-red-500 flex items-center gap-1">
+                        <AlertCircle class="w-4 h-4" />
+                        {{ uploadError }}
+                      </p>
+                      <p class="mt-1 text-xs text-slate-500">支援 JPG、PNG、GIF、WebP，最大 5MB</p>
                     </div>
                   </div>
 

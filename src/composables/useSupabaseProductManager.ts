@@ -70,6 +70,7 @@ export function useSupabaseProductManager() {
   const uploadImage = async (file: File): Promise<string | null> => {
     if (!isSupabaseConfigured()) {
       // 轉換為 base64（localStorage 模式）
+      console.log('📦 使用 localStorage 模式，圖片轉換為 base64')
       return new Promise((resolve) => {
         const reader = new FileReader()
         reader.onload = () => resolve(reader.result as string)
@@ -79,24 +80,43 @@ export function useSupabaseProductManager() {
     }
 
     try {
-      const fileExt = file.name.split('.').pop()
+      const fileExt = file.name.split('.').pop()?.toLowerCase() || 'jpg'
       const fileName = `${crypto.randomUUID()}.${fileExt}`
-      const filePath = `products/${fileName}`
+      // 使用根目錄，避免重複的 products/products 路徑
+      const filePath = fileName
 
-      const { error: uploadError } = await supabase.storage
+      console.log('📤 上傳圖片到 Supabase Storage:', filePath)
+
+      const { data: uploadData, error: uploadError } = await supabase.storage
         .from('products')
-        .upload(filePath, file)
+        .upload(filePath, file, {
+          cacheControl: '3600',
+          upsert: false
+        })
 
-      if (uploadError) throw uploadError
+      if (uploadError) {
+        console.error('❌ Supabase Storage 上傳錯誤:', uploadError)
+        throw uploadError
+      }
+
+      console.log('✅ 上傳成功:', uploadData)
 
       const { data: { publicUrl } } = supabase.storage
         .from('products')
         .getPublicUrl(filePath)
 
+      console.log('🔗 公開 URL:', publicUrl)
       return publicUrl
     } catch (e) {
-      console.error('上傳圖片失敗:', e)
-      return null
+      console.error('❌ 上傳圖片失敗:', e)
+      // 回退到 base64 模式
+      console.log('⚠️ 回退到 base64 模式')
+      return new Promise((resolve) => {
+        const reader = new FileReader()
+        reader.onload = () => resolve(reader.result as string)
+        reader.onerror = () => resolve(null)
+        reader.readAsDataURL(file)
+      })
     }
   }
 

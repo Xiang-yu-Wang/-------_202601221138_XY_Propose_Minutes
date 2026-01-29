@@ -44,15 +44,32 @@ VITE_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.xxx
 
 1. 在 Supabase Dashboard 點擊 **Storage**
 2. 點擊 **New bucket**
-3. 名稱輸入：`product-images`
+3. 名稱輸入：`products`（⚠️ 必須完全一致）
 4. 勾選 **Public bucket**
 5. 點擊 **Create bucket**
 
-6. 設定 Storage 政策（若需要）：
-   - 點擊剛建立的 `product-images` bucket
+6. 設定 Storage 政策：
+   - 點擊剛建立的 `products` bucket
    - 點擊 **Policies** 標籤
-   - 新增 **Public Read Access** 政策（SELECT - true）
-   - 新增 **Authenticated Upload** 政策（INSERT - auth.role() = 'authenticated'）
+   - 點擊 **New policy** → **For full customization**
+   
+   **政策 1 - 公開讀取（讓圖片可被訪問）：**
+   - Name: `Public read access`
+   - Allowed operation: `SELECT`
+   - Target roles: 選擇 `anon`
+   - Policy definition: `true`
+   
+   **政策 2 - 認證用戶可上傳：**
+   - Name: `Authenticated users can upload`
+   - Allowed operation: `INSERT`
+   - Target roles: 選擇 `authenticated`
+   - Policy definition: `true`
+   
+   **政策 3 - 認證用戶可刪除：**
+   - Name: `Authenticated users can delete`
+   - Allowed operation: `DELETE`
+   - Target roles: 選擇 `authenticated`
+   - Policy definition: `true`
 
 ### 步驟 5：建立管理員帳號
 
@@ -130,9 +147,15 @@ VITE_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.xxx
 
 ### 圖片上傳失敗
 
-1. 確認 Storage bucket `products` 已建立
-2. 確認 bucket 設定為 public
-3. 確認已設定正確的 Storage 政策
+1. **確認 Storage bucket 名稱正確**：必須是 `products`（不是 `product-images`）
+2. **確認 bucket 設定為 public**：在 Supabase Dashboard > Storage 檢查
+3. **確認 Storage 政策已設定**：
+   - 需要 SELECT 政策允許 `anon` 角色
+   - 需要 INSERT 政策允許 `authenticated` 角色
+4. **檢查瀏覽器控制台**：按 F12 開啟開發者工具，查看 Console 中的錯誤訊息
+5. **確認已登入**：只有登入後才能上傳圖片
+6. **檢查檔案格式**：僅支援 JPG、PNG、GIF、WebP
+7. **檢查檔案大小**：最大 5MB
 
 ## 從舊系統遷移
 
