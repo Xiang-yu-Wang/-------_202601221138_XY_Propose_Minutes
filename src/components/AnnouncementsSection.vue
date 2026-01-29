@@ -1,12 +1,17 @@
 <script setup lang="ts">
-import { Megaphone } from 'lucide-vue-next'
+import { Megaphone, Loader2 } from 'lucide-vue-next'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { useAnnouncementManager } from '@/composables/useAnnouncementManager'
-import { computed } from 'vue'
-import type { Announcement } from '@/data/announcements'
+import { useSupabaseAnnouncementManager } from '@/composables/useSupabaseAnnouncementManager'
+import { computed, onMounted } from 'vue'
+import type { Announcement } from '@/lib/database.types'
 
-const { announcements } = useAnnouncementManager()
+const { announcements, loading, fetchAnnouncements } = useSupabaseAnnouncementManager()
+
+// 初始化載入資料
+onMounted(() => {
+  fetchAnnouncements()
+})
 
 // 優化：按類型分組，減少DOM重排
 // 這樣可以更有效地利用瀏覽器的批量更新
@@ -44,7 +49,10 @@ const isEmpty = computed(() => announcements.value.length === 0)
       </div>
 
       <!-- Announcements list -->
-      <div v-if="isEmpty" class="text-center py-12 text-gray-500">
+      <div v-if="loading" class="flex justify-center py-12">
+        <Loader2 class="w-8 h-8 animate-spin text-emerald-600" />
+      </div>
+      <div v-else-if="isEmpty" class="text-center py-12 text-gray-500">
         目前沒有公告
       </div>
       <!-- 優化渲染：按優先級分組顯示，重要公告優先 -->

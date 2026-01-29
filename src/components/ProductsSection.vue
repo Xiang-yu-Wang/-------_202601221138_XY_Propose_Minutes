@@ -1,12 +1,21 @@
 <script setup lang="ts">
-import { ShoppingBag, Plus, Minus } from 'lucide-vue-next'
+import { ShoppingBag, Plus, Minus, Loader2 } from 'lucide-vue-next'
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { useProductManager } from '@/composables/useProductManager'
+import { useSupabaseProductManager } from '@/composables/useSupabaseProductManager'
 import { useCart } from '@/composables/useCart'
+import { onMounted, computed } from 'vue'
 
-const { products } = useProductManager()
+const { products, loading, fetchProducts } = useSupabaseProductManager()
 const { cart, addToCart, removeFromCart, getCartCount, getTotalPrice } = useCart()
+
+// 初始化載入資料
+onMounted(() => {
+  fetchProducts()
+})
+
+// 只顯示上架的產品
+const availableProducts = computed(() => products.value.filter(p => p.available))
 </script>
 
 <template>
@@ -25,16 +34,26 @@ const { cart, addToCart, removeFromCart, getCartCount, getTotalPrice } = useCart
       </div>
 
       <!-- Products grid -->
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
-        <Card v-for="product in products" :key="product.id" class="overflow-hidden hover:shadow-lg transition-shadow">
+      <div v-if="loading" class="flex justify-center py-12">
+        <Loader2 class="w-8 h-8 animate-spin text-emerald-600" />
+      </div>
+      <div v-else-if="availableProducts.length === 0" class="text-center py-12 text-gray-500">
+        目前沒有商品
+      </div>
+      <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
+        <Card v-for="product in availableProducts" :key="product.id" class="overflow-hidden hover:shadow-lg transition-shadow">
           <!-- Product image -->
           <div class="relative w-full h-48 overflow-hidden bg-gray-200">
             <img
-              :src="product.image"
+              v-if="product.image_url"
+              :src="product.image_url"
               :alt="product.name"
               loading="lazy"
               class="w-full h-full object-cover hover:scale-105 transition-transform"
             />
+            <div v-else class="w-full h-full flex items-center justify-center">
+              <ShoppingBag class="w-12 h-12 text-gray-400" />
+            </div>
             <!-- Stock badge -->
             <div class="absolute top-3 right-3">
               <span
@@ -104,8 +123,8 @@ const { cart, addToCart, removeFromCart, getCartCount, getTotalPrice } = useCart
         <h3 class="font-bold text-lg text-gray-900 mb-4">購物車小計</h3>
         <div class="space-y-2 mb-4 max-h-40 overflow-y-auto">
           <div v-for="[productIdStr, count] in Object.entries(cart)" :key="productIdStr" class="flex justify-between text-sm text-gray-600">
-            <span>{{ products.find(p => p.id === parseInt(productIdStr))?.name }} x {{ count }}</span>
-            <span>$ {{ (products.find(p => p.id === parseInt(productIdStr))?.price || 0) * count }}</span>
+            <span>{{ products.find(p => p.id === productIdStr)?.name }} x {{ count }}</span>
+            <span>$ {{ (products.find(p => p.id === productIdStr)?.price || 0) * count }}</span>
           </div>
         </div>
         <div class="border-t pt-4">
