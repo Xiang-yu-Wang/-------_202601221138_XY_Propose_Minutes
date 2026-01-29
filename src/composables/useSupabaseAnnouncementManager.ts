@@ -34,10 +34,14 @@ export function useSupabaseAnnouncementManager() {
       const stored = localStorage.getItem(STORAGE_KEY)
       if (stored) {
         announcements.value = JSON.parse(stored)
+        // 按日期降序排序（最新的在前）
+        announcements.value.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
         console.log('📖 從 localStorage 載入公告:', announcements.value.length, '筆')
       } else {
         // 轉換預設數據
         announcements.value = defaultAnnouncements.map(convertLegacyAnnouncement)
+        // 按日期降序排序（最新的在前）
+        announcements.value.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
         console.log('📖 使用預設公告:', announcements.value.length, '筆')
       }
       return
@@ -67,6 +71,8 @@ export function useSupabaseAnnouncementManager() {
       const stored = localStorage.getItem(STORAGE_KEY)
       if (stored) {
         announcements.value = JSON.parse(stored)
+        // 按日期降序排序（最新的在前）
+        announcements.value.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
         console.log('📖 備援：從 localStorage 載入公告')
       }
     } finally {

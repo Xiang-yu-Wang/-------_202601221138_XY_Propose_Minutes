@@ -14,7 +14,7 @@ onMounted(() => {
   subscribeToChanges()
 })
 
-// 優化：按類型分組，減少DOM重排
+// 優化：按類型分組並排序，減少DOM重排
 // 這樣可以更有效地利用瀏覽器的批量更新
 const groupedAnnouncements = computed(() => {
   const groups: Record<'important' | 'new' | 'info', Announcement[]> = {
@@ -25,6 +25,13 @@ const groupedAnnouncements = computed(() => {
   
   announcements.value.forEach((ann: Announcement) => {
     groups[ann.type as 'important' | 'new' | 'info'].push(ann)
+  })
+  
+  // 每個分組內按日期降序排序（最新的在前）
+  Object.keys(groups).forEach(key => {
+    groups[key as keyof typeof groups].sort((a, b) => {
+      return new Date(b.date).getTime() - new Date(a.date).getTime()
+    })
   })
   
   return groups
