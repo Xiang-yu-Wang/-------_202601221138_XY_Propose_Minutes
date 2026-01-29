@@ -1,11 +1,17 @@
 <script setup lang="ts">
 import { Megaphone, ArrowRight } from 'lucide-vue-next'
 import { RouterLink } from 'vue-router'
-import { useAnnouncementManager } from '@/composables/useAnnouncementManager'
+import { useSupabaseAnnouncementManager } from '@/composables/useSupabaseAnnouncementManager'
 import { Badge } from '@/components/ui/badge'
-import { computed } from 'vue'
+import { computed, onMounted } from 'vue'
 
-const { announcements } = useAnnouncementManager()
+const { announcements, fetchAnnouncements, subscribeToChanges } = useSupabaseAnnouncementManager()
+
+// 初始化載入資料和訂閱實時更新
+onMounted(() => {
+  fetchAnnouncements()
+  subscribeToChanges()
+})
 
 // 只顯示最新 2 則公告
 const latestAnnouncements = computed(() => announcements.value.slice(0, 2))
