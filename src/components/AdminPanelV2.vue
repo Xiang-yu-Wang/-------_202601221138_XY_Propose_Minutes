@@ -21,6 +21,7 @@ import { useSupabaseAnnouncementManager } from '@/composables/useSupabaseAnnounc
 import { useSupabaseProductManager } from '@/composables/useSupabaseProductManager'
 import { isSupabaseConfigured } from '@/lib/supabase'
 import type { Announcement, Product } from '@/lib/database.types'
+import { deliveryPhotos as defaultDeliveryPhotos, type DeliveryPhoto } from '@/data/deliveryPhotos'
 
 // 認證
 const { 
@@ -69,7 +70,7 @@ const loginError = ref('')
 const showPassword = ref(false)
 
 // 頁籤管理
-const activeTab = ref<'announcements' | 'products'>('announcements')
+const activeTab = ref<'announcements' | 'products' | 'delivery-photos'>('announcements')
 
 // 處理登入
 const handleLogin = async () => {
@@ -405,6 +406,116 @@ const handleProductReset = async () => {
   }
 }
 
+// ===== 交貨照管理 =====
+const deliveryPhotos = ref<DeliveryPhoto[]>(defaultDeliveryPhotos)
+const isDeliveryPhotoFormOpen = ref(false)
+const isEditingDeliveryPhoto = ref(false)
+const editingDeliveryPhotoId = ref<string | null>(null)
+const getDefaultDate = (): string => {
+  const date = new Date()
+  return date.toISOString().split('T')[0]!
+}
+const deliveryPhotoFormData = ref<{
+  title: string
+  description: string
+  date: string
+  location: string
+  url: string
+}>({
+  title: '',
+  description: '',
+  date: getDefaultDate(),
+  location: '',
+  url: ''
+})
+const deliveryPhotoImagePreview = ref<string>('')
+
+const resetDeliveryPhotoForm = () => {
+  deliveryPhotoFormData.value = {
+    title: '',
+    description: '',
+    date: getDefaultDate(),
+    location: '',
+    url: ''
+  }
+  deliveryPhotoImagePreview.value = ''
+  isEditingDeliveryPhoto.value = false
+  editingDeliveryPhotoId.value = null
+}
+
+const startEditDeliveryPhoto = (photo: DeliveryPhoto) => {
+  deliveryPhotoFormData.value = {
+    title: photo.title,
+    description: photo.description,
+    date: photo.date,
+    location: photo.location,
+    url: photo.url
+  }
+  deliveryPhotoImagePreview.value = photo.url
+  editingDeliveryPhotoId.value = photo.id
+  isEditingDeliveryPhoto.value = true
+  isDeliveryPhotoFormOpen.value = true
+}
+
+const handleDeliveryPhotoSubmit = async () => {
+  if (!deliveryPhotoFormData.value.title || !deliveryPhotoFormData.value.url || !deliveryPhotoFormData.value.location) {
+    alert('請填寫標題、圖片和位置')
+    return
+  }
+
+  if (isEditingDeliveryPhoto.value && editingDeliveryPhotoId.value) {
+    // 編輯
+    const index = deliveryPhotos.value.findIndex(p => p.id === editingDeliveryPhotoId.value)
+    if (index !== -1) {
+      deliveryPhotos.value[index] = {
+        id: editingDeliveryPhotoId.value,
+        title: deliveryPhotoFormData.value.title,
+        description: deliveryPhotoFormData.value.description,
+        date: deliveryPhotoFormData.value.date,
+        location: deliveryPhotoFormData.value.location,
+        url: deliveryPhotoFormData.value.url
+      }
+    }
+  } else {
+    // 新增
+    const newPhoto: DeliveryPhoto = {
+      id: Date.now().toString(),
+      title: deliveryPhotoFormData.value.title,
+      description: deliveryPhotoFormData.value.description,
+      date: deliveryPhotoFormData.value.date,
+      location: deliveryPhotoFormData.value.location,
+      url: deliveryPhotoFormData.value.url
+    }
+    deliveryPhotos.value.push(newPhoto)
+  }
+
+  // 保存到本地儲存
+  localStorage.setItem('deliveryPhotos', JSON.stringify(deliveryPhotos.value))
+  alert(isEditingDeliveryPhoto.value ? '更新成功！' : '新增成功！')
+  isDeliveryPhotoFormOpen.value = false
+  resetDeliveryPhotoForm()
+}
+
+const handleDeleteDeliveryPhoto = (id: string) => {
+  if (confirm('確定要刪除此交貨照嗎？')) {
+    deliveryPhotos.value = deliveryPhotos.value.filter(p => p.id !== id)
+    localStorage.setItem('deliveryPhotos', JSON.stringify(deliveryPhotos.value))
+    alert('刪除成功！')
+  }
+}
+
+// 初始化時從本地儲存讀取
+onMounted(() => {
+  const saved = localStorage.getItem('deliveryPhotos')
+  if (saved) {
+    try {
+      deliveryPhotos.value = JSON.parse(saved)
+    } catch (e) {
+      console.error('讀取交貨照失敗', e)
+    }
+  }
+})
+
 // 工具函數
 const getTypeColor = (type: string) => {
   switch (type) {
@@ -598,6 +709,18 @@ const isConfigured = computed(() => isSupabaseConfigured())
           >
             <Package class="w-4 h-4" />
             產品管理
+          </button>
+          <button
+            @click="activeTab = 'delivery-photos'"
+            :class="[
+              'px-6 py-2.5 rounded-xl font-medium transition-all flex items-center gap-2',
+              activeTab === 'delivery-photos'
+                ? 'bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-lg shadow-emerald-500/25'
+                : 'text-slate-600 hover:bg-slate-100'
+            ]"
+          >
+            <ImageIcon class="w-4 h-4" />
+            交貨照管理
           </button>
         </div>
 
@@ -1014,6 +1137,148 @@ const isConfigured = computed(() => isSupabaseConfigured())
                       <Edit2 class="w-4 h-4" />
                     </Button>
                     <Button size="sm" variant="outline" @click="handleProductDelete(product.id)" class="rounded-lg text-red-600 hover:text-red-700 hover:bg-red-50 hover:border-red-200">
+                      <Trash2 class="w-4 h-4" />
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 交貨照管理 -->
+        <div v-show="activeTab === 'delivery-photos'" class="space-y-6">
+          <!-- 統計卡片 -->
+          <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+            <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
+              <div class="flex items-center justify-between mb-3">
+                <div class="w-10 h-10 bg-slate-100 rounded-xl flex items-center justify-center">
+                  <ImageIcon class="w-5 h-5 text-slate-600" />
+                </div>
+              </div>
+              <p class="text-3xl font-bold text-slate-900">{{ deliveryPhotos.length }}</p>
+              <p class="text-sm text-slate-500 mt-1">總照片數</p>
+            </div>
+          </div>
+
+          <!-- 操作按鈕 -->
+          <div class="flex flex-wrap gap-3">
+            <Dialog v-model:open="isDeliveryPhotoFormOpen">
+              <DialogTrigger as-child>
+                <Button 
+                  @click="resetDeliveryPhotoForm" 
+                  class="gap-2 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 shadow-lg shadow-emerald-500/25 rounded-xl"
+                >
+                  <Plus class="w-4 h-4" />
+                  新增交貨照
+                </Button>
+              </DialogTrigger>
+              <DialogContent class="sm:max-w-[600px] rounded-2xl">
+                <DialogHeader>
+                  <DialogTitle class="text-xl">{{ isEditingDeliveryPhoto ? '編輯交貨照' : '新增交貨照' }}</DialogTitle>
+                  <DialogDescription>
+                    {{ isEditingDeliveryPhoto ? '修改現有交貨照的資訊' : '添加新的交貨照片' }}
+                  </DialogDescription>
+                </DialogHeader>
+
+                <div class="space-y-4 py-4">
+                  <div>
+                    <label class="text-sm font-medium text-slate-700">標題 *</label>
+                    <Input v-model="deliveryPhotoFormData.title" placeholder="例：台北地區交貨" class="mt-1.5 rounded-xl" />
+                  </div>
+
+                  <div class="grid grid-cols-2 gap-4">
+                    <div>
+                      <label class="text-sm font-medium text-slate-700">日期 *</label>
+                      <Input v-model="deliveryPhotoFormData.date" type="date" class="mt-1.5 rounded-xl" />
+                    </div>
+                    <div>
+                      <label class="text-sm font-medium text-slate-700">位置 *</label>
+                      <Input v-model="deliveryPhotoFormData.location" placeholder="例：台北市" class="mt-1.5 rounded-xl" />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label class="text-sm font-medium text-slate-700">說明</label>
+                    <Textarea v-model="deliveryPhotoFormData.description" placeholder="例：客戶滿意收到紀念品" rows="3" class="mt-1.5 rounded-xl" />
+                  </div>
+
+                  <div>
+                    <label class="text-sm font-medium text-slate-700">圖片 URL *</label>
+                    <Input v-model="deliveryPhotoFormData.url" placeholder="https://..." class="mt-1.5 rounded-xl" />
+                    <p class="text-xs text-slate-500 mt-1.5">可直接貼上圖片網址或使用圖床服務（如 Imgur、Strikingly CDN）</p>
+                  </div>
+
+                  <!-- 圖片預覽 -->
+                  <div v-if="deliveryPhotoFormData.url" class="mt-4">
+                    <label class="text-sm font-medium text-slate-700 mb-2 block">預覽</label>
+                    <div class="rounded-xl overflow-hidden bg-slate-100 aspect-square">
+                      <img 
+                        :src="deliveryPhotoFormData.url" 
+                        alt="預覽"
+                        class="w-full h-full object-cover"
+                        @error="deliveryPhotoFormData.url = ''"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <DialogFooter class="gap-2">
+                  <Button variant="outline" @click="isDeliveryPhotoFormOpen = false" class="rounded-xl">取消</Button>
+                  <Button @click="handleDeliveryPhotoSubmit" class="rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600">
+                    {{ isEditingDeliveryPhoto ? '更新' : '新增' }}
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
+          </div>
+
+          <!-- 交貨照列表 -->
+          <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+            <div class="p-5 border-b border-slate-100">
+              <h3 class="font-semibold text-slate-900">交貨照列表</h3>
+              <p class="text-sm text-slate-500 mt-1">共 {{ deliveryPhotos.length }} 張照片</p>
+            </div>
+            
+            <div v-if="deliveryPhotos.length === 0" class="p-12 text-center">
+              <div class="w-16 h-16 bg-slate-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                <ImageIcon class="w-8 h-8 text-slate-400" />
+              </div>
+              <p class="text-slate-500">還沒有交貨照</p>
+              <p class="text-sm text-slate-400 mt-1">點擊上方「新增交貨照」開始</p>
+            </div>
+
+            <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 p-5">
+              <div
+                v-for="photo in deliveryPhotos"
+                :key="photo.id"
+                class="bg-slate-50 rounded-xl overflow-hidden group hover:shadow-lg transition-shadow"
+              >
+                <!-- 圖片 -->
+                <div class="relative aspect-square bg-slate-200 overflow-hidden">
+                  <img 
+                    :src="photo.url" 
+                    :alt="photo.title"
+                    class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                  />
+                </div>
+
+                <!-- 資訊 -->
+                <div class="p-4 space-y-3">
+                  <div>
+                    <h4 class="font-semibold text-slate-900">{{ photo.title }}</h4>
+                    <p class="text-xs text-slate-500 mt-0.5">📍 {{ photo.location }} • 📅 {{ new Date(photo.date).toLocaleDateString('zh-TW') }}</p>
+                  </div>
+                  
+                  <p v-if="photo.description" class="text-sm text-slate-600 line-clamp-2">{{ photo.description }}</p>
+
+                  <!-- 操作按鈕 -->
+                  <div class="flex gap-2 pt-2 border-t border-slate-200">
+                    <Button size="sm" variant="outline" @click="startEditDeliveryPhoto(photo)" class="flex-1 gap-1.5 rounded-lg">
+                      <Edit2 class="w-4 h-4" />
+                      編輯
+                    </Button>
+                    <Button size="sm" variant="outline" @click="handleDeleteDeliveryPhoto(photo.id)" class="rounded-lg text-red-600 hover:text-red-700 hover:bg-red-50 hover:border-red-200">
                       <Trash2 class="w-4 h-4" />
                     </Button>
                   </div>

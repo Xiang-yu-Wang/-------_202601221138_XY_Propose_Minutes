@@ -6,6 +6,7 @@ import PlansSection from '@/components/PlansSection.vue'
 import TestimonialsSection from '@/components/TestimonialsSection.vue'
 import FAQSection from '@/components/FAQSection.vue'
 import AdvantagesSection from '@/components/AdvantagesSection.vue'
+import DeliveryPhotosSection from '@/components/DeliveryPhotosSection.vue'
 import { useJsonLd } from '@/composables/useJsonLd'
 import { testimonials } from '@/data/testimonials'
 
@@ -20,6 +21,7 @@ useJsonLd({ testimonials })
     <ServicesSection />
     <PlansSection />
     <TestimonialsSection />
+    <DeliveryPhotosSection />
     <FAQSection />
     <AdvantagesSection />
   </div>
