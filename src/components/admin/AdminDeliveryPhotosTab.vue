@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, watch } from 'vue'
 import { Trash2, Plus, Download, Upload, RotateCcw, Edit2 } from 'lucide-vue-next'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -79,12 +79,14 @@ const startEdit = (photo: DeliveryPhoto) => {
   isFormOpen.value = true
 }
 
-// 監聽 URL 輸入以預覽圖片
-const handleUrlChange = () => {
-  if (formData.value.url) {
-    previewUrl.value = formData.value.url
+// 監聽 URL 輸入以預覽圖片（使用 watch 自動更新）
+watch(() => formData.value.url, (newUrl) => {
+  if (newUrl && newUrl.startsWith('http')) {
+    previewUrl.value = newUrl
+  } else {
+    previewUrl.value = ''
   }
-}
+})
 
 // 提交表單
 const handleSubmit = () => {
@@ -249,7 +251,6 @@ const handleReset = () => {
               <label class="text-sm font-semibold mb-2 block">圖片 URL *</label>
               <Input
                 v-model="formData.url"
-                @input="handleUrlChange"
                 placeholder="粘貼圖片網址，例: https://..."
                 type="url"
               />
