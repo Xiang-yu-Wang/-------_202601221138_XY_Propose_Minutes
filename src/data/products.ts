@@ -4,7 +4,7 @@ export interface Product {
   name: string
   category: string
   price: number
-  image: string
+  image_url: string
   description: string
   available: boolean
 }
