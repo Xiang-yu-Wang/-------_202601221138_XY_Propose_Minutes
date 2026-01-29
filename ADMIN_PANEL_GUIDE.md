@@ -30,23 +30,36 @@
 
 **開發環境**（測試用）：
 ```
-http://localhost:5173/#/admin
+http://localhost:5173/admin
 ```
 
 **生產環境**（正式網站）：
 ```
-https://你的網站域名/#/admin
+https://你的網站域名/admin
 ```
 
-### 登入密碼
+### 登入方式
 
-- **預設密碼**: `admin123`
-- 輸入密碼後點擊「登入」按鈕
-- 密碼會保存在瀏覽器中，下次訪問不需重新輸入
+系統使用 **Supabase 認證**，提供企業級安全性：
 
-### 安全提示
+1. 在登入頁面輸入 **Email** 和 **密碼**
+2. 點擊「登入管理後台」按鈕
+3. 登入成功後即可開始管理
 
-⚠️ **重要**: 管理後臺密碼硬編碼在前端代碼中，僅適合內部使用。請勿在公開場合分享管理後臺網址。
+### 帳號管理
+
+管理員帳號在 Supabase Dashboard 中建立：
+1. 前往 [Supabase Dashboard](https://supabase.com/dashboard)
+2. 選擇專案 → **Authentication** → **Users**
+3. 點擊 **Add user** 建立新管理員
+
+### 安全特性
+
+✅ **Supabase 認證優勢**:
+- 🔒 企業級密碼加密
+- 🛡️ Row Level Security (RLS) 保護資料
+- 🔑 JWT Token 認證
+- 📧 支援 Email 驗證（可選）
 
 ---
 

@@ -44,25 +44,15 @@ VITE_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.xxx
 
 1. 在 Supabase Dashboard 點擊 **Storage**
 2. 點擊 **New bucket**
-3. 名稱輸入：`products`
+3. 名稱輸入：`product-images`
 4. 勾選 **Public bucket**
 5. 點擊 **Create bucket**
 
-6. 設定 Storage 政策：
-   - 點擊剛建立的 `products` bucket
+6. 設定 Storage 政策（若需要）：
+   - 點擊剛建立的 `product-images` bucket
    - 點擊 **Policies** 標籤
-   - 點擊 **New policy**
-   - 選擇 **For full customization**
-   - 政策名稱：`Public Read Access`
-   - Allowed operation：`SELECT`
-   - Policy definition：`true`
-   - 點擊 **Save policy**
-
-   - 再新增一個政策：
-   - 政策名稱：`Authenticated Upload`
-   - Allowed operation：`INSERT`
-   - Policy definition：`auth.role() = 'authenticated'`
-   - 點擊 **Save policy**
+   - 新增 **Public Read Access** 政策（SELECT - true）
+   - 新增 **Authenticated Upload** 政策（INSERT - auth.role() = 'authenticated'）
 
 ### 步驟 5：建立管理員帳號
 
