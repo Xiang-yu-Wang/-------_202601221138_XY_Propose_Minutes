@@ -91,17 +91,17 @@ const availableProducts = computed(() => products.value.filter(p => p.available)
             <!-- Cart controls -->
             <div v-if="product.available" class="w-full flex items-center gap-2">
               <Button
-                @click="removeFromCart(product.id)"
-                :disabled="getCartCount(product.id) === 0"
+                @click="removeFromCart(parseInt(product.id))"
+                :disabled="getCartCount(parseInt(product.id)) === 0"
                 variant="outline"
                 size="icon"
                 class="h-8 w-8"
               >
                 <Minus class="w-4 h-4" />
               </Button>
-              <span class="flex-1 text-center font-semibold text-gray-900">{{ getCartCount(product.id) }}</span>
+              <span class="flex-1 text-center font-semibold text-gray-900">{{ getCartCount(parseInt(product.id)) }}</span>
               <Button
-                @click="addToCart(product.id)"
+                @click="addToCart(parseInt(product.id))"
                 variant="default"
                 size="icon"
                 class="h-8 w-8 bg-emerald-600 hover:bg-emerald-700"
