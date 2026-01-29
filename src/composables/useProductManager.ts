@@ -38,7 +38,7 @@ export function useProductManager() {
       name: product.name,
       category: product.category,
       price: product.price,
-      image: product.image,
+      image_url: product.image_url,
       description: product.description,
       available: product.available
     }
@@ -57,7 +57,7 @@ export function useProductManager() {
         name: updated.name || current.name,
         category: updated.category || current.category,
         price: updated.price !== undefined ? updated.price : current.price,
-        image: updated.image || current.image,
+        image_url: updated.image_url || current.image_url,
         description: updated.description || current.description,
         available: updated.available !== undefined ? updated.available : current.available
       }
@@ -106,7 +106,7 @@ export function useProductManager() {
       const imported = JSON.parse(jsonString) as Product[]
       // 驗證數據結構
       if (Array.isArray(imported) && imported.every(p => 
-        p.id && p.name && p.category && typeof p.price === 'number' && p.image && p.description && typeof p.available === 'boolean'
+        p.id && p.name && p.category && typeof p.price === 'number' && p.image_url && p.description && typeof p.available === 'boolean'
       )) {
         products.value = imported
         saveToLocalStorage()

@@ -9,7 +9,7 @@ const convertLegacyProduct = (legacy: any): Product => ({
   name: legacy.name,
   category: legacy.category,
   price: legacy.price,
-  image_url: legacy.image || null,
+  image_url: legacy.image_url || legacy.image || null,
   description: legacy.description || null,
   available: legacy.available ?? true,
   sort_order: 0,
@@ -260,7 +260,7 @@ export function useSupabaseProductManager() {
         name: p.name,
         category: p.category,
         price: p.price,
-        image_url: p.image || null,
+        image_url: p.image_url || null,
         description: p.description || null,
         available: p.available ?? true
       }))

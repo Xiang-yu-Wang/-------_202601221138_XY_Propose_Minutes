@@ -301,7 +301,7 @@ function generateProductSchema(product: Product) {
     '@id': `${baseURL}/products#product-${product.id}`,
     name: product.name,
     description: product.description,
-    image: product.image,
+    image: product.image_url,
     brand: {
       '@type': 'Brand',
       name: organizationInfo.name,
@@ -343,7 +343,7 @@ function generateProductListSchema(products: Product[]) {
         '@type': 'Product',
         '@id': `${baseURL}/products#product-${product.id}`,
         name: product.name,
-        image: product.image,
+        image: product.image_url,
         offers: {
           '@type': 'Offer',
           price: product.price,
