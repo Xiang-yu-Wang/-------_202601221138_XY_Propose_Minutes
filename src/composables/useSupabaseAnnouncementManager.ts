@@ -118,6 +118,11 @@ export function useSupabaseAnnouncementManager() {
       if (data) {
         announcements.value.unshift(data)
         console.log('✅ 已新增到本地狀態，目前公告數:', announcements.value.length)
+        
+        // 重新訂閱實時更新，確保獲取其他來源的變化
+        if (!isSubscribed) {
+          subscribeToChanges()
+        }
       }
       
       return { success: true, data }
@@ -319,9 +324,19 @@ export function useSupabaseAnnouncementManager() {
   // 初始化時載入數據
   // 設定實時訂閱（監聽 Supabase 資料庫變化）
   const subscribeToChanges = () => {
-    if (!isSupabaseConfigured() || isSubscribed) return
+    if (!isSupabaseConfigured()) {
+      console.log('🔕 Supabase 未配置，跳過實時訂閱')
+      return
+    }
+    
+    if (isSubscribed) {
+      console.log('🔔 實時訂閱已活躍，跳過重複訂閱')
+      return
+    }
 
     isSubscribed = true
+    console.log('🔌 建立 Supabase 實時訂閱...')
+    
     supabase
       .channel('announcements-changes')
       .on(
@@ -331,12 +346,19 @@ export function useSupabaseAnnouncementManager() {
           schema: 'public',
           table: 'announcements'
         },
-        async () => {
+        async (payload: any) => {
+          console.log('📨 檢測到公告資料庫變化:', payload.eventType)
           // 任何資料庫變化都觸發重新載入
           await fetchAnnouncements()
         }
       )
-      .subscribe()
+      .subscribe((status, err) => {
+        if (status === 'SUBSCRIBED') {
+          console.log('✅ 實時訂閱已連接')
+        } else if (status === 'CHANNEL_ERROR') {
+          console.error('❌ 訂閱錯誤:', err)
+        }
+      })
   }
 
   onMounted(() => {
