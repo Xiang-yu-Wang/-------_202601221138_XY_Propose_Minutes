@@ -7,7 +7,10 @@ import {
   DialogContent,
   DialogTrigger,
 } from '@/components/ui/dialog'
-import { deliveryPhotos } from '@/data/deliveryPhotos'
+import { useDeliveryPhotoManager } from '@/composables/useDeliveryPhotoManager'
+
+// 使用 composable 讀取動態數據（與後台管理同步）
+const { deliveryPhotos } = useDeliveryPhotoManager()
 
 // Pagination state
 const currentPage = ref(1)
@@ -30,13 +33,13 @@ const buildSrcSet = (url: string, format: string = 'auto') =>
 const thumbnailUrl = (url: string) => buildOptimizedUrl(url, 640, 'auto')
 
 // Computed pagination values
-const pageCount = computed(() => Math.ceil(deliveryPhotos.length / pageSize))
+const pageCount = computed(() => Math.ceil(deliveryPhotos.value.length / pageSize))
 const isFirstPage = computed(() => currentPage.value === 1)
 const isLastPage = computed(() => currentPage.value >= pageCount.value)
 
 const currentPageSize = computed(() => {
   const start = (currentPage.value - 1) * pageSize
-  return deliveryPhotos.slice(start, start + pageSize)
+  return deliveryPhotos.value.slice(start, start + pageSize)
 })
 
 const prev = () => {
