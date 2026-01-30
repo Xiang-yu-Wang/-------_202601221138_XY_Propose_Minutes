@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import GallerySection from '@/components/GallerySection.vue'
+import DeliveryPhotosSection from '@/components/DeliveryPhotosSection.vue'
 </script>
 
 <template>
   <div class="pt-16">
-    <GallerySection />
+    <DeliveryPhotosSection />
   </div>
 </template>

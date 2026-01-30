@@ -87,17 +87,6 @@ const handleSyncProducts = async () => {
     isSyncing.value = false
   }
 }
-
-// 同步交貨照到 GitHub
-const handleSyncDeliveryPhotos = async () => {
-  if (!token.value) {
-    alert('請先設定 GitHub Token')
-    isTokenDialogOpen.value = true
-    return
-  }
-
-  if (!confirm('確定要同步交貨照到 GitHub？這將更新遠端倉庫的檔案。')) {
-    return
   }
 
   isSyncing.value = true

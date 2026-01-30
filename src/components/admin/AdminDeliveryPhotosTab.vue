@@ -139,9 +139,10 @@ const handleImport = (event: Event) => {
   if (!file) return
 
   const reader = new FileReader()
-  reader.onload = (e) => {
+  reader.onload = async (e) => {
     const content = e.target?.result as string
-    if (importFromJson(content)) {
+    const success = await importFromJson(content)
+    if (success) {
       alert('交貨照數據已導入')
       input.value = ''
     } else {

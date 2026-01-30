@@ -10,7 +10,7 @@ import {
 import { useSupabaseDeliveryPhotoManager } from '@/composables/useSupabaseDeliveryPhotoManager'
 
 // 使用 Supabase composable 讀取動態數據（雲端同步）
-const { deliveryPhotos, loading } = useSupabaseDeliveryPhotoManager()
+const { deliveryPhotos } = useSupabaseDeliveryPhotoManager()
 
 // Pagination state
 const currentPage = ref(1)
